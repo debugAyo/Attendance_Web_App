@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fa fa-users"></i> Manage Members</h2>
+        <a href="?export=csv" class="btn btn-outline-success"><i class="fa fa-download"></i> Export CSV</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-primary">
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Gender</th>
+                    <th>Date of Birth</th>
+                    <th>Age</th>
+                    <th>Email</th>
+                    <th>First Visit</th>
+                    <th>Total Attendance</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in members %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td><strong>{{ member.name }}</strong></td>
+                    <td>{{ member.phone }}</td>
+                    <td>
+                        {% if member.gender == 'Male' %}
+                            <span class="badge bg-primary"><i class="fa fa-male"></i> Male</span>
+                        {% elif member.gender == 'Female' %}
+                            <span class="badge bg-danger"><i class="fa fa-female"></i> Female</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ member.gender|default:"N/A" }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ member.date_of_birth|date:"M d, Y"|default:"Not provided" }}</td>
+                    <td>
+                        {% if member.age %}
+                            {{ member.age }} yrs
+                            {% if member.age < 13 %}
+                                <span class="badge bg-warning">Child</span>
+                            {% endif %}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>{{ member.email|default:"Not provided" }}</td>
+                    <td>{{ member.first_visit_date|date:"M d, Y"|default:"N/A" }}</td>
+                    <td>
+                        <span class="badge bg-success" style="font-size: 0.9rem;">{{ member.attendance_count }}</span>
+                    </td>
+                    <td>
+                        <a href="{% url 'edit_member' member.id %}" class="btn btn-sm btn-primary" title="Edit">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                        <a href="{% url 'remove_member' member.id %}" class="btn btn-sm btn-danger" 
+                           onclick="return confirm('Are you sure you want to remove {{ member.name }}?');" title="Remove">
+                            <i class="fa fa-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="10" class="text-center text-muted">No members found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Summary Stats -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card text-center bg-info text-white">
+                <div class="card-body">
+                    <h5>Total Members</h5>
+                    <h2>{{ members|length }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

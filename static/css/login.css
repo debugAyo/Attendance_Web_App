@@ -1,0 +1,213 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #f4f7f6;
+}
+
+.auth-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+.auth-info-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 3rem;
+    position: relative;
+    background-image: url('../images/hands-together-unity.jpg');
+    background-size: cover;
+    background-position: center;
+    color: white;
+}
+
+/* Add a dark overlay for readability */
+.auth-info-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+
+/* Ensure content is above the overlay */
+.auth-info-panel > * {
+    position: relative;
+    z-index: 2;
+}
+
+.auth-info-panel .logo {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+}
+
+.auth-info-panel h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+}
+
+.auth-info-panel p {
+    font-size: 1.1rem;
+    color: #f0f0f0;
+    max-width: 500px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.auth-info-panel .illustration {
+   display: none; /* Hide the img tag as it's now a background */
+}
+
+.auth-form-panel {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    background-color: #ffffff;
+}
+
+.auth-form-wrapper {
+    width: 100%;
+    max-width: 450px;
+}
+
+.auth-form-wrapper h2 {
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.auth-form-wrapper .subtitle {
+    color: #777;
+    margin-bottom: 2.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    background-color: #f4f7f6;
+    border: 1px solid #dce4e3;
+    border-radius: 10px;
+    color: #333;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.form-control::placeholder {
+    color: #aaa;
+}
+
+.form-control:focus {
+    background-color: #fff;
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 1rem;
+    background: #0d6efd;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-submit:hover {
+    background: #0b5ed7;
+}
+
+.form-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+    color: #555;
+}
+
+.form-footer a {
+    color: #0d6efd;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.form-footer a:hover {
+    text-decoration: underline;
+}
+
+.alert {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+    color: #856404;
+}
+
+/* For signup form specifically */
+.auth-form-wrapper.signup {
+    max-height: 95vh;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+/* Custom scrollbar for signup form */
+.auth-form-wrapper.signup::-webkit-scrollbar {
+    width: 8px;
+}
+.auth-form-wrapper.signup::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+.auth-form-wrapper.signup::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+.auth-form-wrapper.signup::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}

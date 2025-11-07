@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Add New Event - RollCall{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3><i class="fa fa-plus-circle"></i> Add New Church Event</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="title" class="form-label">Event Title *</label>
+                                <input type="text" class="form-control" id="title" name="title" required>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="event_type" class="form-label">Event Type *</label>
+                                <select class="form-control" id="event_type" name="event_type" required>
+                                    {% for type_value, type_label in event_types %}
+                                    <option value="{{ type_value }}">{{ type_label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="start_date" class="form-label">Start Date *</label>
+                                <input type="date" class="form-control" id="start_date" name="start_date" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="start_time" class="form-label">Start Time *</label>
+                                <input type="time" class="form-control" id="start_time" name="start_time" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="end_date" class="form-label">End Date (Optional)</label>
+                                <input type="date" class="form-control" id="end_date" name="end_date">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="end_time" class="form-label">End Time (Optional)</label>
+                                <input type="time" class="form-control" id="end_time" name="end_time">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="location" class="form-label">Location</label>
+                                <input type="text" class="form-control" id="location" name="location" placeholder="Church Hall, Conference Room, etc.">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="organizer" class="form-label">Organizer</label>
+                                <input type="text" class="form-control" id="organizer" name="organizer" placeholder="Pastor, Youth Leader, etc.">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="is_recurring" name="is_recurring">
+                                    <label class="form-check-label" for="is_recurring">
+                                        Recurring Event
+                                    </label>
+                                </div>
+                                <input type="text" class="form-control mt-2" id="recurring_pattern" name="recurring_pattern" placeholder="e.g., Weekly on Sunday" style="display:none;">
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="max_attendees" class="form-label">Max Attendees (Optional)</label>
+                                <input type="number" class="form-control" id="max_attendees" name="max_attendees" min="1" placeholder="Leave blank for unlimited">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="registration_required" name="registration_required">
+                                <label class="form-check-label" for="registration_required">
+                                    <strong>Require Registration</strong> - Members must register before attending
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'events_calendar' %}" class="btn btn-secondary">
+                                <i class="fa fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-save"></i> Create Event
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('is_recurring').addEventListener('change', function() {
+    const pattern = document.getElementById('recurring_pattern');
+    pattern.style.display = this.checked ? 'block' : 'none';
+});
+</script>
+{% endblock %}

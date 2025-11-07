@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="fw-bold mb-4">Admin Settings</h2>
+
+    <!-- Church Services Management -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4>Manage Church Services</h4>
+            <a href="{% url 'add_service' %}" class="btn btn-primary">Add Service</a>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Service Name</th>
+                        <th>Service Code</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for service in services %}
+                    <tr>
+                        <td>{{ service.name }}</td>
+                        <td><code>{{ service.code }}</code></td>
+                        <td>
+                            <a href="{% url 'edit_service' service.id %}" class="btn btn-sm btn-warning">Edit</a>
+                            <a href="{% url 'delete_service' service.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this service?');">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center">No services found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Admin Users Management - Only for Superusers -->
+    {% if is_superuser %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4>Manage Admins</h4>
+            <a href="{% url 'add_admin' %}" class="btn btn-primary">Add Admin</a>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for admin in admins %}
+                    <tr>
+                        <td>{{ admin.username }}</td>
+                        <td>{{ admin.email }}</td>
+                        <td>{% if admin.is_superuser %}Superuser{% else %}Admin{% endif %}</td>
+                        <td>
+                            {% if admin.id != user.id %}
+                            <a href="{% url 'remove_admin' admin.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Remove this admin?');">Remove</a>
+                            {% else %}
+                            <span class="text-muted">You (Cannot remove yourself)</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> Only superusers can manage admin accounts.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

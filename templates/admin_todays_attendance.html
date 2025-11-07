@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="fa fa-calendar-check"></i> Today's Attendance</h2>
+        <a href="?export=csv" class="btn btn-outline-success"><i class="fa fa-download"></i> Export CSV</a>
+    </div>
+    
+    <!-- Service Statistics Cards -->
+    <div class="row mb-4">
+        {% for service in service_stats %}
+        <div class="col-md-4 mb-3">
+            <div class="card text-center border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{{ service.service__name }}</h5>
+                </div>
+                <div class="card-body">
+                    <h2 class="display-4 text-primary">{{ service.total }}</h2>
+                    <p class="mb-0">Total Attendees</p>
+                    <small class="text-muted">Code: <strong>{{ service.service_code }}</strong></small>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">No attendance records for today yet.</div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Detailed Attendance Table -->
+    <div class="card">
+        <div class="card-header">
+            <h4><i class="fa fa-list"></i> Detailed Attendance Records</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Service</th>
+                            <th>Code Used</th>
+                            <th>Time</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for attendance in todays_attendance %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><strong>{{ attendance.name }}</strong></td>
+                            <td>{{ attendance.phone }}</td>
+                            <td><span class="badge bg-info">{{ attendance.service.name }}</span></td>
+                            <td><span class="badge bg-secondary">{{ attendance.service_code }}</span></td>
+                            <td>{{ attendance.timestamp|date:"g:i A" }}</td>
+                            <td>
+                                <a href="{% url 'remove_attendance' attendance.id %}" class="btn btn-sm btn-danger" 
+                                   onclick="return confirm('Remove {{ attendance.name }}\'s attendance?');" title="Remove">
+                                    <i class="fa fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="7" class="text-center text-muted">No attendance recorded today.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

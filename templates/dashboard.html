@@ -1,0 +1,897 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - RollCall</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f7fa;
+        display: flex;
+        min-height: 100vh;
+    }
+    
+    /* Sidebar Styles */
+    .sidebar {
+        width: 250px;
+        background: linear-gradient(180deg, #2196F3 0%, #1976D2 100%);
+        color: white;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    }
+    
+    .sidebar-header {
+        padding: 1.5rem 1rem;
+        background: rgba(0,0,0,0.1);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .sidebar-header h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+    
+    .sidebar-section {
+        padding: 1.5rem 0 0.5rem 1rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: rgba(255,255,255,0.6);
+        font-weight: 600;
+    }
+    
+    .sidebar-nav {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .sidebar-nav-item {
+        margin-bottom: 2px;
+    }
+    
+    .sidebar-nav-link {
+        display: flex;
+        align-items: center;
+        padding: 0.875rem 1rem;
+        color: rgba(255,255,255,0.9);
+        text-decoration: none;
+        transition: all 0.3s;
+        border-left: 3px solid transparent;
+    }
+    
+    .sidebar-nav-link:hover,
+    .sidebar-nav-link.active {
+        background: rgba(255,255,255,0.15);
+        color: white;
+        border-left-color: white;
+    }
+    
+    .sidebar-nav-link i {
+        width: 24px;
+        margin-right: 12px;
+        font-size: 1.1rem;
+    }
+    
+    /* Main Content */
+    .main-content {
+        flex: 1;
+        margin-left: 250px;
+        padding: 2rem;
+        width: calc(100% - 250px);
+    }
+    
+    .top-bar {
+        background: white;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+    
+    .breadcrumb-text {
+        color: #95a5a6;
+        font-size: 0.9rem;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+        border-left: 4px solid;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .stat-card.primary { border-left-color: #667eea; }
+    .stat-card.success { border-left-color: #28a745; }
+    .stat-card.warning { border-left-color: #ffc107; }
+    .stat-card.danger { border-left-color: #dc3545; }
+    .stat-card.info { border-left-color: #17a2b8; }
+    
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 0.5rem 0;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        opacity: 0.3;
+        float: right;
+    }
+    
+    .card-modern {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+        border: none;
+    }
+    
+    .card-modern .card-header {
+        background: transparent;
+        border-bottom: 2px solid #f0f2f5;
+        padding: 1.25rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .card-modern .card-body {
+        padding: 1.25rem;
+    }
+    
+    .activity-item {
+        padding: 0.75rem;
+        border-left: 3px solid #e9ecef;
+        margin-bottom: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 5px;
+        transition: all 0.2s;
+    }
+    
+    .activity-item:hover {
+        border-left-color: #667eea;
+        background: #e7f3ff;
+    }
+    
+    .activity-time {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    
+    .progress-custom {
+        height: 8px;
+        border-radius: 10px;
+        background: #e9ecef;
+    }
+    
+    .progress-custom .progress-bar {
+        border-radius: 10px;
+    }
+    
+    .badge-custom {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+    
+    .table-modern {
+        background: white;
+    }
+    
+    .table-modern thead th {
+        background: #f8f9fa;
+        border: none;
+        color: #495057;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .table-modern tbody tr {
+        transition: background 0.2s;
+    }
+    
+    .table-modern tbody tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .alert-modern {
+        border: none;
+        border-radius: 10px;
+        border-left: 4px solid;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+    
+    .quick-action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: white;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        color: #495057;
+        text-decoration: none;
+        transition: all 0.2s;
+        margin-bottom: 1rem;
+    }
+    
+    .quick-action-btn:hover {
+        border-color: #667eea;
+        color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+    }
+    
+    .quick-action-btn i {
+        font-size: 1.5rem;
+        margin-right: 0.75rem;
+    }
+    
+    /* Accordion Styles */
+    .accordion .btn {
+        border-radius: 8px;
+        text-align: left;
+        transition: all 0.3s;
+    }
+    
+    .accordion .btn:hover {
+        background: #f8f9fa;
+        transform: translateX(5px);
+    }
+    
+    .accordion .btn[aria-expanded="true"] {
+        background: #f8f9fa;
+    }
+    
+    .accordion .btn[aria-expanded="true"] .fa-chevron-down {
+        transform: rotate(180deg);
+        transition: transform 0.3s;
+    }
+    
+    .accordion .card-body {
+        animation: fadeIn 0.3s;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .btn-outline-warning:hover,
+    .btn-outline-danger:hover {
+        color: white;
+    }
+</style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fa fa-church"></i> RollCall</h3>
+        </div>
+        
+        <div class="sidebar-section">Main</div>
+        <ul class="sidebar-nav">
+            <li class="sidebar-nav-item">
+                <a href="{% url 'home' %}" class="sidebar-nav-link active">
+                    <i class="fa fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="{% url 'mark_attendance' %}" class="sidebar-nav-link">
+                    <i class="fa fa-clipboard-check"></i>
+                    <span>Mark Attendance</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-section">Attendance</div>
+        <ul class="sidebar-nav">
+            <li class="sidebar-nav-item">
+                <a href="{% url 'admin_manage_members' %}" class="sidebar-nav-link">
+                    <i class="fa fa-users"></i>
+                    <span>Manage Members</span>
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="{% url 'admin_todays_attendance' %}" class="sidebar-nav-link">
+                    <i class="fa fa-calendar-check"></i>
+                    <span>Today's Attendance</span>
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="{% url 'admin_summary' %}" class="sidebar-nav-link">
+                    <i class="fa fa-chart-bar"></i>
+                    <span>Summary</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-section">Management</div>
+        <ul class="sidebar-nav">
+            <li class="sidebar-nav-item">
+                <a href="{% url 'events_calendar' %}" class="sidebar-nav-link">
+                    <i class="fa fa-calendar-alt"></i>
+                    <span>Events Calendar</span>
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="{% url 'admin_settings' %}" class="sidebar-nav-link">
+                    <i class="fa fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="{% url 'signup' %}" class="sidebar-nav-link">
+                    <i class="fa fa-user-plus"></i>
+                    <span>Add Member</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="sidebar-section">Account</div>
+        <ul class="sidebar-nav">
+            <li class="sidebar-nav-item">
+                <a href="{% url 'logout' %}" class="sidebar-nav-link">
+                    <i class="fa fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div>
+                <h1 class="page-title">Dashboard</h1>
+                <p class="breadcrumb-text mb-0">Dashboard / Attendance</p>
+            </div>
+            <div class="text-end">
+                <div class="fs-6 text-muted">
+                    <i class="fa fa-calendar-day"></i> {{ today|date:"l, F d, Y" }}
+                </div>
+                <div class="fs-6 text-muted">
+                    <i class="fa fa-user"></i> Welcome, {{ request.user.username|title }}
+                </div>
+            </div>
+        </div>
+    
+    <!-- Statistics Cards Row -->
+    <div class="row">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card primary">
+                <i class="fa fa-users stat-icon"></i>
+                <div class="stat-label">Total Members</div>
+                <div class="stat-value text-primary">{{ total_members }}</div>
+                <small class="text-muted"><i class="fa fa-chart-line"></i> Active Members</small>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card success">
+                <i class="fa fa-check-circle stat-icon"></i>
+                <div class="stat-label">Today's Attendance</div>
+                <div class="stat-value text-success">{{ todays_attendance_count }}</div>
+                <small class="text-muted"><i class="fa fa-calendar-day"></i> Present Today</small>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card warning">
+                <i class="fa fa-male stat-icon"></i>
+                <div class="stat-label">Male Members</div>
+                <div class="stat-value text-warning">{{ male_count }}</div>
+                <small class="text-muted">{{ male_percentage }}% of total</small>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card danger">
+                <i class="fa fa-female stat-icon"></i>
+                <div class="stat-label">Female Members</div>
+                <div class="stat-value text-danger">{{ female_count }}</div>
+                <small class="text-muted">{{ female_percentage }}% of total</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Secondary Stats Row -->
+    <div class="row">
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card info">
+                <i class="fa fa-child stat-icon"></i>
+                <div class="stat-label">Children</div>
+                <div class="stat-value text-info">{{ children_count }}</div>
+                <small class="text-muted">Under 13 years</small>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card primary">
+                <i class="fa fa-church stat-icon"></i>
+                <div class="stat-label">Total Services</div>
+                <div class="stat-value text-primary">{{ total_attendance }}</div>
+                <small class="text-muted">All Time</small>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card success">
+                <i class="fa fa-user-plus stat-icon"></i>
+                <div class="stat-label">New This Month</div>
+                <div class="stat-value text-success">{{ new_members_this_month }}</div>
+                <small class="text-muted">New Registrations</small>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6">
+            <div class="stat-card warning">
+                <i class="fa fa-exclamation-triangle stat-icon"></i>
+                <div class="stat-label">Absentees</div>
+                <div class="stat-value text-warning">{{ absentee_members|length }}</div>
+                <small class="text-muted">Missed 2+ Services</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Today's Attendance -->
+            <div class="card-modern">
+                <div class="card-header">
+                    <i class="fa fa-clipboard-check text-success"></i> Today's Attendance
+                    <span class="float-end badge bg-success">{{ todays_attendance_count }} Present</span>
+                </div>
+                <div class="card-body">
+                    {% if todays_attendance %}
+                    <div class="table-responsive">
+                        <table class="table table-modern table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Service</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for attendance in todays_attendance|slice:":10" %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td><strong>{{ attendance.name }}</strong></td>
+                                    <td><small class="text-muted">{{ attendance.phone }}</small></td>
+                                    <td><span class="badge-custom bg-primary">{{ attendance.service.name }}</span></td>
+                                    <td><small class="text-muted">{{ attendance.timestamp|date:"g:i A" }}</small></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if todays_attendance.count > 10 %}
+                    <div class="text-center mt-3">
+                        <a href="{% url 'admin_todays_attendance' %}" class="btn btn-outline-primary btn-sm">
+                            View All {{ todays_attendance_count }} Attendance Records <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fa fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No attendance recorded today yet.</p>
+                        <a href="{% url 'mark_attendance' %}" class="btn btn-primary">
+                            <i class="fa fa-plus-circle"></i> Mark Attendance
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Monthly Attendance Trend -->
+            <div class="card-modern">
+                <div class="card-header">
+                    <i class="fa fa-chart-line text-primary"></i> Attendance Trend (Last 30 Days)
+                </div>
+                <div class="card-body">
+                    <canvas id="monthlyTrendChart" height="80"></canvas>
+                </div>
+            </div>
+            
+            <!-- Service Breakdown -->
+            <div class="card-modern">
+                <div class="card-header">
+                    <i class="fa fa-list-alt text-info"></i> Service Breakdown
+                </div>
+                <div class="card-body">
+                    {% if service_attendance %}
+                    <div class="table-responsive">
+                        <table class="table table-modern">
+                            <thead>
+                                <tr>
+                                    <th>Service Name</th>
+                                    <th>Date</th>
+                                    <th>Code</th>
+                                    <th class="text-end">Attendance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for service in service_attendance|slice:":8" %}
+                                <tr>
+                                    <td><strong>{{ service.service__name }}</strong></td>
+                                    <td><small class="text-muted">{{ service.timestamp__date }}</small></td>
+                                    <td><span class="badge-custom bg-info">{{ service.service__code }}</span></td>
+                                    <td class="text-end"><span class="badge-custom bg-success">{{ service.total }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">No service data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card-modern">
+                <div class="card-header">
+                    <i class="fa fa-bolt text-warning"></i> Quick Actions
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'mark_attendance' %}" class="quick-action-btn">
+                        <i class="fa fa-clipboard-check text-success"></i>
+                        <span>Mark Attendance</span>
+                    </a>
+                    <a href="{% url 'admin_manage_members' %}" class="quick-action-btn">
+                        <i class="fa fa-users text-primary"></i>
+                        <span>Manage Members</span>
+                    </a>
+                    <a href="{% url 'events_calendar' %}" class="quick-action-btn">
+                        <i class="fa fa-calendar text-info"></i>
+                        <span>Events Calendar</span>
+                    </a>
+                    <a href="{% url 'admin_summary' %}" class="quick-action-btn">
+                        <i class="fa fa-chart-bar text-warning"></i>
+                        <span>View Reports</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Top Attendees -->
+            <div class="card-modern">
+                <div class="card-header">
+                    <i class="fa fa-trophy text-warning"></i> Top Attendees
+                </div>
+                <div class="card-body">
+                    {% if top_members %}
+                    {% for member in top_members %}
+                    <div class="activity-item {% if forloop.first %}border-warning{% endif %}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                {% if forloop.counter == 1 %}
+                                <span class="fs-4">👑</span>
+                                {% elif forloop.counter == 2 %}
+                                <span class="fs-5">🥈</span>
+                                {% elif forloop.counter == 3 %}
+                                <span class="fs-5">🥉</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ forloop.counter }}</span>
+                                {% endif %}
+                                <strong class="ms-2">{{ member.name }}</strong>
+                                {% if forloop.first %}
+                                <span class="badge-custom bg-warning text-dark ms-2">
+                                    <i class="fa fa-star"></i> Top
+                                </span>
+                                {% endif %}
+                            </div>
+                            <span class="badge-custom bg-success">{{ member.total }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-muted text-center py-3">No attendance data yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Absentee Alert -->
+            {% if absentee_members %}
+            <div class="alert alert-modern alert-danger border-danger">
+                <h6 class="alert-heading">
+                    <i class="fa fa-exclamation-triangle"></i> Absentee Alert
+                </h6>
+                <p class="mb-2"><strong>{{ absentee_members|length }}</strong> member(s) missed the last 2 services.</p>
+                <hr>
+                <div class="accordion" id="absenteeAccordion">
+                    {% for member in absentee_members %}
+                    <div class="mb-2">
+                        <button class="btn btn-outline-danger btn-sm w-100 text-start" type="button" data-bs-toggle="collapse" data-bs-target="#absentee{{ forloop.counter }}" aria-expanded="false">
+                            <i class="fa fa-user"></i> <strong>{{ member.name }}</strong>
+                            <i class="fa fa-chevron-down float-end"></i>
+                        </button>
+                        <div id="absentee{{ forloop.counter }}" class="collapse" data-bs-parent="#absenteeAccordion">
+                            <div class="card card-body mt-2 bg-light border-danger">
+                                <p class="mb-1"><i class="fa fa-phone text-primary"></i> <strong>Phone:</strong> <a href="tel:{{ member.phone }}">{{ member.phone }}</a></p>
+                                {% if member.email %}
+                                <p class="mb-1"><i class="fa fa-envelope text-info"></i> <strong>Email:</strong> <a href="mailto:{{ member.email }}">{{ member.email }}</a></p>
+                                {% endif %}
+                                {% if member.last_attendance %}
+                                <p class="mb-1"><i class="fa fa-calendar text-warning"></i> <strong>Last Attended:</strong> {{ member.last_attendance.timestamp|date:"M d, Y - g:i A" }}</p>
+                                <p class="mb-1"><i class="fa fa-clock text-muted"></i> <strong>Absent For:</strong> {{ member.last_attendance.timestamp|timesince }}</p>
+                                {% else %}
+                                <p class="mb-1"><i class="fa fa-times text-danger"></i> <strong>Last Attended:</strong> Never</p>
+                                {% endif %}
+                                {% if member.is_child %}
+                                <span class="badge bg-warning text-dark"><i class="fa fa-child"></i> Child ({{ member.age }} years)</span>
+                                {% else %}
+                                <span class="badge bg-info"><i class="fa fa-user"></i> Adult</span>
+                                {% endif %}
+                                <div class="mt-2">
+                                    <a href="tel:{{ member.phone }}" class="btn btn-sm btn-primary me-1">
+                                        <i class="fa fa-phone"></i> Call
+                                    </a>
+                                    {% if member.email %}
+                                    <a href="mailto:{{ member.email }}" class="btn btn-sm btn-info">
+                                        <i class="fa fa-envelope"></i> Email
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Inactive Members -->
+            {% if inactive_members %}
+            <div class="card-modern">
+                <div class="card-header">
+                    <i class="fa fa-user-clock text-warning"></i> Inactive Members
+                    <span class="badge bg-warning text-dark float-end">30+ Days</span>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="inactiveAccordion">
+                        {% for member in inactive_members|slice:":10" %}
+                        <div class="mb-2">
+                            <button class="btn btn-outline-warning btn-sm w-100 text-start activity-item p-2" type="button" data-bs-toggle="collapse" data-bs-target="#inactive{{ forloop.counter }}" aria-expanded="false">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <i class="fa fa-user-circle text-warning"></i>
+                                        <strong class="ms-2">{{ member.name }}</strong>
+                                    </div>
+                                    <i class="fa fa-chevron-down"></i>
+                                </div>
+                            </button>
+                            <div id="inactive{{ forloop.counter }}" class="collapse" data-bs-parent="#inactiveAccordion">
+                                <div class="card card-body mt-2 bg-light">
+                                    <div class="row">
+                                        <div class="col-12 mb-2">
+                                            <i class="fa fa-phone text-primary"></i> <strong>Phone:</strong>
+                                            <br><a href="tel:{{ member.phone }}" class="text-decoration-none">{{ member.phone }}</a>
+                                        </div>
+                                        {% if member.email %}
+                                        <div class="col-12 mb-2">
+                                            <i class="fa fa-envelope text-info"></i> <strong>Email:</strong>
+                                            <br><a href="mailto:{{ member.email }}" class="text-decoration-none">{{ member.email }}</a>
+                                        </div>
+                                        {% endif %}
+                                        <div class="col-12 mb-2">
+                                            <i class="fa fa-venus-mars text-secondary"></i> <strong>Gender:</strong>
+                                            <br>{{ member.gender|title|default:"Not specified" }}
+                                        </div>
+                                        {% if member.date_of_birth %}
+                                        <div class="col-12 mb-2">
+                                            <i class="fa fa-birthday-cake text-success"></i> <strong>Date of Birth:</strong>
+                                            <br>{{ member.date_of_birth|date:"M d, Y" }}
+                                        </div>
+                                        {% endif %}
+                                        <div class="col-12 mb-2">
+                                            <i class="fa fa-calendar-plus text-muted"></i> <strong>First Visit:</strong>
+                                            <br>{{ member.first_visit_date|date:"M d, Y"|default:"Not recorded" }}
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex gap-2">
+                                        <a href="tel:{{ member.phone }}" class="btn btn-sm btn-primary flex-fill">
+                                            <i class="fa fa-phone"></i> Call
+                                        </a>
+                                        {% if member.email %}
+                                        <a href="mailto:{{ member.email }}" class="btn btn-sm btn-info flex-fill">
+                                            <i class="fa fa-envelope"></i> Email
+                                        </a>
+                                        {% endif %}
+                                        <a href="sms:{{ member.phone }}" class="btn btn-sm btn-success flex-fill">
+                                            <i class="fa fa-sms"></i> SMS
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Member Demographics -->
+            <div class="card-modern">
+                <div class="card-header">
+                    <i class="fa fa-chart-pie text-success"></i> Demographics
+                </div>
+                <div class="card-body">
+                    <canvas id="demographicsChart" height="200"></canvas>
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span><i class="fa fa-male text-primary"></i> Male</span>
+                            <strong>{{ male_count }} ({{ male_percentage }}%)</strong>
+                        </div>
+                        <div class="progress-custom mb-3">
+                            <div class="progress-bar bg-primary" style="width: {{ male_percentage }}%"></div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <span><i class="fa fa-female text-danger"></i> Female</span>
+                            <strong>{{ female_count }} ({{ female_percentage }}%)</strong>
+                        </div>
+                        <div class="progress-custom mb-3">
+                            <div class="progress-bar bg-danger" style="width: {{ female_percentage }}%"></div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <span><i class="fa fa-child text-info"></i> Children</span>
+                            <strong>{{ children_count }} ({{ children_percentage }}%)</strong>
+                        </div>
+                        <div class="progress-custom">
+                            <div class="progress-bar bg-info" style="width: {{ children_percentage }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Monthly Trend Chart
+const monthlyTrendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
+new Chart(monthlyTrendCtx, {
+    type: 'line',
+    data: {
+        labels: {{ monthly_labels|safe }},
+        datasets: [{
+            label: 'Daily Attendance',
+            data: {{ monthly_data|safe }},
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            borderWidth: 3,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: '#667eea',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    drawBorder: false,
+                    color: 'rgba(0,0,0,0.05)'
+                }
+            },
+            x: {
+                grid: {
+                    display: false
+                }
+            }
+        }
+    }
+});
+
+// Demographics Pie Chart
+const demographicsCtx = document.getElementById('demographicsChart').getContext('2d');
+new Chart(demographicsCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['Male', 'Female', 'Children'],
+        datasets: [{
+            data: [{{ male_count }}, {{ female_count }}, {{ children_count }}],
+            backgroundColor: ['#667eea', '#dc3545', '#17a2b8'],
+            borderWidth: 3,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 15,
+                    font: {
+                        size: 12
+                    }
+                }
+            }
+        }
+    }
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

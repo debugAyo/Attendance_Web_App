@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="fw-bold mb-4">Attendance Summary & Statistics</h2>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Total Members</h5>
+                    <p class="display-6">{{ total_members }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Present Today</h5>
+                    <p class="display-6 text-success">{{ present_today }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">This Week</h5>
+                    <p class="display-6">{{ this_week }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">This Month</h5>
+                    <p class="display-6">{{ this_month }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New: First-Timers & Birthdays Row -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-star"></i> First-Timers This Week</h5>
+                </div>
+                <div class="card-body text-center">
+                    <h2 class="text-success">{{ first_timers_week }}</h2>
+                    <p class="text-muted">New members who joined this week</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">🎂 Upcoming Birthdays</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_birthdays %}
+                        <ul class="list-unstyled mb-0">
+                            {% for birthday in upcoming_birthdays %}
+                                <li class="mb-2">
+                                    <strong>{{ birthday.name }}</strong> - {{ birthday.date|date:"M d" }}
+                                    <span class="badge bg-primary">{{ birthday.days_until }} day{{ birthday.days_until|pluralize }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">No upcoming birthdays in the next 30 days.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">💍 Upcoming Anniversaries</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_anniversaries %}
+                        <ul class="list-unstyled mb-0">
+                            {% for anniversary in upcoming_anniversaries %}
+                                <li class="mb-2">
+                                    <strong>{{ anniversary.name }}</strong> - {{ anniversary.date|date:"M d" }}
+                                    <span class="badge bg-danger">{{ anniversary.years }} yr{{ anniversary.years|pluralize }}</span>
+                                    <span class="badge bg-warning text-dark">{{ anniversary.days_until }} day{{ anniversary.days_until|pluralize }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">No upcoming anniversaries in the next 30 days.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Chart -->
+    <div class="card mb-4">
+        <div class="card-header"><h4>Weekly Attendance Trend</h4></div>
+        <div class="card-body">
+            <canvas id="attendanceChart" width="400" height="150"></canvas>
+        </div>
+    </div>
+
+    <!-- Top Attendees -->
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h4><i class="fa fa-trophy"></i> Top Attendees</h4>
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Total Attendance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attendee in top_attendees %}
+                    <tr {% if forloop.first %}class="table-warning"{% endif %}>
+                        <td>
+                            {% if forloop.counter == 1 %}
+                                <span style="font-size: 1.5rem;">👑</span> #1
+                            {% elif forloop.counter == 2 %}🥈
+                            {% elif forloop.counter == 3 %}🥉
+                            {% else %}{{ forloop.counter }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            <strong>{{ attendee.name }}</strong>
+                            {% if forloop.first %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="fa fa-star"></i> Top Attendee
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>{{ attendee.phone }}</td>
+                        <td><span class="badge bg-success">{{ attendee.count }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('attendanceChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ chart_labels|safe }},
+        datasets: [{
+            label: 'Daily Attendance',
+            data: {{ chart_data|safe }},
+            borderColor: 'rgba(54, 162, 235, 1)',
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: { 
+                display: true,
+                position: 'top'
+            },
+            title: {
+                display: true,
+                text: 'Last 7 Days Attendance Trend',
+                font: {
+                    size: 16,
+                    weight: 'bold'
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

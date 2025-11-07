@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Registration - RollCall</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-info-panel">
+            <div class="logo">
+                <i class="fa fa-church"></i>
+                <span>RollCall</span>
+            </div>
+            <h1>Join Our Community</h1>
+            <p>Become a part of our church family. Register as a member to stay connected, receive updates, and easily mark your attendance for services and events.</p>
+            
+        </div>
+        <div class="auth-form-panel">
+            <div class="auth-form-wrapper signup">
+                <h2>Member Registration</h2>
+                <p class="subtitle">Create your member profile below.</p>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags == 'warning' %}alert-warning{% else %}alert-danger{% endif %}" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" novalidate id="signup-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="role" value="member">
+
+                    <div class="form-group">
+                        {{ form.name.label_tag }}
+                        {{ form.name }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.phone.label_tag }}
+                        {{ form.phone }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.gender.label_tag }}
+                        {{ form.gender }}
+                    </div>
+                    
+                    <hr style="border-color: #ddd;">
+                    <p class="text-center small text-muted">Optional Details</p>
+
+                    <div class="form-group">
+                        {{ form.date_of_birth.label_tag }}
+                        {{ form.date_of_birth }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.wedding_anniversary.label_tag }}
+                        {{ form.wedding_anniversary }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.member_email.label_tag }}
+                        {{ form.member_email }}
+                    </div>
+                    <div class="form-group">
+                        {{ form.how_heard.label_tag }}
+                        {{ form.how_heard }}
+                    </div>
+                    <div class="form-group" id="how_heard_other_field" style="display:none;">
+                        {{ form.how_heard_other.label_tag }}
+                        {{ form.how_heard_other }}
+                    </div>
+
+                    <button type="submit" class="btn-submit">Create Account</button>
+                </form>
+                <div class="form-footer">
+                    <p>Already registered? <a href="{% url 'member_mark_attendance' %}">Mark Attendance</a></p>
+                    <p>Are you an admin? <a href="{% url 'login' %}">Admin Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.getElementById('id_how_heard').addEventListener('change', function() {
+        var otherField = document.getElementById('how_heard_other_field');
+        otherField.style.display = (this.value === 'other') ? 'block' : 'none';
+    });
+    </script>
+</body>
+</html>
+

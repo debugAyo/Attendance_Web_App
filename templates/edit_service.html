@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header"><h4>Edit Church Service</h4></div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Service Name</label>
+                            <input type="text" class="form-control" name="name" value="{{ service.name }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="code" class="form-label">Service Code</label>
+                            <input type="text" class="form-control" name="code" value="{{ service.code }}" required>
+                            <small class="form-text text-muted">Members will use this code to mark attendance.</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a href="{% url 'admin_settings' %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

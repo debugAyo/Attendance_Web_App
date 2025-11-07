@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm text-center">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <i class="fa fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h2 class="text-success mb-3">Registration Successful!</h2>
+                    <p class="lead mb-4">
+                        Welcome, <strong>{{ name }}</strong>! 🎉
+                    </p>
+                    <p class="text-muted mb-4">
+                        You're all set! You can now mark your attendance using your name and the service code provided during church services.
+                    </p>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'member_mark_attendance' %}" class="btn btn-primary btn-lg">
+                            <i class="fa fa-calendar-check"></i> Mark Attendance Now
+                        </a>
+                        <a href="{% url 'landing' %}" class="btn btn-outline-secondary">
+                            <i class="fa fa-home"></i> Back to Home
+                        </a>
+                    </div>
+                    
+                    <div class="alert alert-info mt-4" role="alert">
+                        <small>
+                            <i class="fa fa-info-circle"></i> 
+                            <strong>Quick Tip:</strong> Save this page or bookmark it for easy access to mark attendance in the future!
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

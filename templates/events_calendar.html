@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Events Calendar - RollCall{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fa fa-calendar"></i> Church Events Calendar</h2>
+                <a href="{% url 'add_event' %}" class="btn btn-primary">
+                    <i class="fa fa-plus"></i> Add New Event
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Main Calendar -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="?month={{ prev_month }}&year={{ prev_year }}" class="btn btn-sm btn-light">
+                            <i class="fa fa-chevron-left"></i> Previous
+                        </a>
+                        <h4 class="mb-0">{{ month_name }} {{ year }}</h4>
+                        <a href="?month={{ next_month }}&year={{ next_year }}" class="btn btn-sm btn-light">
+                            Next <i class="fa fa-chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-bordered mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-center">Sun</th>
+                                <th class="text-center">Mon</th>
+                                <th class="text-center">Tue</th>
+                                <th class="text-center">Wed</th>
+                                <th class="text-center">Thu</th>
+                                <th class="text-center">Fri</th>
+                                <th class="text-center">Sat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for week in calendar %}
+                            <tr>
+                                {% for day in week %}
+                                <td class="calendar-day p-2" style="height: 100px; vertical-align: top; {% if day == 0 %}background-color: #f8f9fa;{% elif day == today.day and month == today.month and year == today.year %}background-color: #fff3cd;{% endif %}">
+                                    {% if day != 0 %}
+                                        <div class="d-flex justify-content-between">
+                                            <strong>{{ day }}</strong>
+                                            {% if day in events_by_date %}
+                                                <span class="badge bg-primary">{{ events_by_date|get_item:day|length }}</span>
+                                            {% endif %}
+                                        </div>
+                                        {% if day in events_by_date %}
+                                            <div class="mt-1">
+                                                {% for event in events_by_date|get_item:day %}
+                                                    <a href="{% url 'event_detail' event.id %}" 
+                                                       class="badge bg-{% if event.event_type == 'service' %}success{% elif event.event_type == 'prayer' %}primary{% elif event.event_type == 'fellowship' %}info{% else %}secondary{% endif %} d-block mb-1 text-start text-decoration-none"
+                                                       title="{{ event.title }} at {{ event.start_time }}">
+                                                        <small>{{ event.start_time|date:"g:i A" }} - {{ event.title|truncatechars:15 }}</small>
+                                                    </a>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Legend -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6>Event Types:</h6>
+                    <span class="badge bg-success me-2">Church Service</span>
+                    <span class="badge bg-primary me-2">Prayer Meeting</span>
+                    <span class="badge bg-info me-2">Fellowship</span>
+                    <span class="badge bg-secondary me-2">Other Events</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Today's Events -->
+            {% if todays_events %}
+            <div class="card mb-3">
+                <div class="card-header bg-warning text-dark">
+                    <h5><i class="fa fa-calendar-day"></i> Today's Events</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for event in todays_events %}
+                        <li class="list-group-item">
+                            <a href="{% url 'event_detail' event.id %}" class="text-decoration-none">
+                                <strong>{{ event.title }}</strong><br>
+                                <small class="text-muted">
+                                    <i class="fa fa-clock"></i> {{ event.start_time|date:"g:i A" }}
+                                    {% if event.location %}
+                                    <br><i class="fa fa-map-marker-alt"></i> {{ event.location }}
+                                    {% endif %}
+                                </small>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Upcoming Events -->
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fa fa-calendar-alt"></i> Upcoming Events (Next 30 Days)</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_events %}
+                    <div class="list-group">
+                        {% for event in upcoming_events %}
+                        <a href="{% url 'event_detail' event.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ event.title }}</h6>
+                                <small class="badge bg-{% if event.event_type == 'service' %}success{% elif event.event_type == 'prayer' %}primary{% else %}secondary{% endif %}">
+                                    {{ event.get_event_type_display }}
+                                </small>
+                            </div>
+                            <p class="mb-1">
+                                <small>
+                                    <i class="fa fa-calendar"></i> {{ event.start_date|date:"M d, Y" }}<br>
+                                    <i class="fa fa-clock"></i> {{ event.start_time|date:"g:i A" }}
+                                    {% if event.location %}
+                                    <br><i class="fa fa-map-marker-alt"></i> {{ event.location }}
+                                    {% endif %}
+                                </small>
+                            </p>
+                            {% if event.registration_required %}
+                            <span class="badge bg-warning text-dark">
+                                <i class="fa fa-clipboard-check"></i> Registration Required
+                            </span>
+                            {% endif %}
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No upcoming events scheduled.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.calendar-day {
+    min-height: 100px;
+}
+.calendar-day:hover {
+    background-color: #f0f0f0 !important;
+}
+</style>
+{% endblock %}

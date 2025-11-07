@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RollCall Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f0f2f5; /* Lighter gray for a softer look */
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .stat-card {
+            background-color: white;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: transform .2s;
+            margin-bottom: 20px;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-card .card-body {
+            display: flex;
+            align-items: center;
+        }
+        .stat-card .icon {
+            font-size: 2.5rem;
+            margin-right: 20px;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        .icon-classes { background-color: #e7f3ff; color: #0d6efd; }
+        .icon-attendance { background-color: #e5f9f0; color: #198754; }
+        .icon-missed { background-color: #fdeeee; color: #dc3545; }
+
+        .card-title {
+            font-size: 1rem;
+            color: #6c757d;
+        }
+        .card-text {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #343a40;
+        }
+        .main-content {
+            padding-top: 30px;
+        }
+        .welcome-header {
+            margin-bottom: 30px;
+        }
+        .actions .btn {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-clipboard-list me-2"></i>RollCall
+            </a>
+            <div class="d-flex align-items-center">
+                <span class="navbar-text me-3">
+                    Hello, {{ user.username }}
+                </span>
+                <form action="{% url 'logout' %}" method="post" class="d-flex">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-primary btn-sm">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Content -->
+    <div class="container main-content">
+        <div class="welcome-header">
+            <h2>Your Dashboard</h2>
+            <p class="text-muted">Here's a summary of your attendance.</p>
+        </div>
+
+        <div class="row">
+            <!-- Total Classes Card -->
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="card-body">
+                        <div class="icon icon-classes">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title">Total Classes</h5>
+                            <p class="card-text">12</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Attendance Rate Card -->
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="card-body">
+                        <div class="icon icon-attendance">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title">Attendance Rate</h5>
+                            <p class="card-text text-success">95%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Missed Classes Card -->
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="card-body">
+                        <div class="icon icon-missed">
+                            <i class="fas fa-user-times"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title">Missed Classes</h5>
+                            <p class="card-text text-danger">2</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 p-4 bg-white rounded shadow-sm actions text-center">
+            <h4>Quick Actions</h4>
+            <a href="#" class="btn btn-primary"><i class="fas fa-list-alt me-2"></i>View Full Report</a>
+            <a href="#" class="btn btn-outline-secondary"><i class="fas fa-cog me-2"></i>Settings</a>
+        </div>
+    </div>
+
+</body>
+</html>
