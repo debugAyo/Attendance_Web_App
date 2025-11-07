@@ -172,15 +172,6 @@ STORAGES = {
 # Reduce the number of database connections
 CONN_MAX_AGE = 600  # Keep database connections alive for 10 minutes
 
-# Template caching in production (enabled when DEBUG=False)
-if not DEBUG:
-    TEMPLATES[0]['OPTIONS']['loaders'] = [
-        ('django.template.loaders.cached.Loader', [
-            'django.template.loaders.filesystem.Loader',
-            'django.template.loaders.app_directories.Loader',
-        ]),
-    ]
-
 # Email Configuration
 # For development: Console backend (prints emails to console)
 # For production: Configure with real SMTP settings
