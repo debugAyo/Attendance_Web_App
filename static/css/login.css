@@ -216,23 +216,60 @@ body {
 @media (max-width: 768px) {
     body {
         overflow-y: auto;
+        background-image: url('../images/hands-together-unity.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+    
+    /* Add dark overlay to body for readability */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: -1;
     }
     
     .auth-container {
         flex-direction: column;
         height: auto;
         min-height: 100vh;
+        background: transparent;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem 0;
     }
     
-    /* Hide the image panel on mobile to focus on the form */
+    /* Hide the info panel on mobile - image is now background */
     .auth-info-panel {
         display: none;
     }
     
+    /* Make form panel centered with white background */
     .auth-form-panel {
-        flex: 1;
-        padding: 1.5rem;
-        min-height: 100vh;
+        flex: none;
+        width: 90%;
+        max-width: 450px;
+        padding: 2rem;
+        background-color: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Add logo at top of form on mobile */
+    .auth-form-wrapper::before {
+        content: '🏛️ RollCall';
+        display: block;
+        text-align: center;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #0d6efd;
+        margin-bottom: 1rem;
     }
     
     .auth-form-wrapper {
@@ -241,13 +278,28 @@ body {
     
     .auth-form-wrapper h2 {
         font-size: 1.8rem;
+        text-align: center;
+    }
+    
+    .auth-form-wrapper .subtitle {
+        text-align: center;
     }
 }
 
-/* Mobile Responsive Design - Phones */
+/* Mobile Responsive Design - Small Phones */
 @media (max-width: 480px) {
+    .auth-container {
+        padding: 1rem 0;
+    }
+    
     .auth-form-panel {
-        padding: 1rem;
+        width: 95%;
+        padding: 1.5rem;
+        border-radius: 15px;
+    }
+    
+    .auth-form-wrapper::before {
+        font-size: 1.5rem;
     }
     
     .auth-form-wrapper h2 {
