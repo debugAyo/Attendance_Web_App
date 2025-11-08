@@ -172,6 +172,85 @@ STORAGES = {
 # Reduce the number of database connections
 CONN_MAX_AGE = 600  # Keep database connections alive for 10 minutes
 
+# Security Settings for Production
+if not DEBUG:
+    # HTTPS/SSL Settings
+    SECURE_SSL_REDIRECT = True  # Redirect all HTTP to HTTPS
+    SESSION_COOKIE_SECURE = True  # Only send session cookie over HTTPS
+    CSRF_COOKIE_SECURE = True  # Only send CSRF cookie over HTTPS
+    SECURE_BROWSER_XSS_FILTER = True  # Enable browser XSS filtering
+    SECURE_CONTENT_TYPE_NOSNIFF = True  # Prevent MIME type sniffing
+    X_FRAME_OPTIONS = 'DENY'  # Prevent clickjacking
+    SECURE_HSTS_SECONDS = 31536000  # Force HTTPS for 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    
+    # Additional security headers
+    SECURE_REFERRER_POLICY = 'same-origin'
+
+# Session Security
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
+SESSION_COOKIE_AGE = 86400  # Session expires after 24 hours
+SESSION_SAVE_EVERY_REQUEST = True  # Update session on every request
+SESSION_COOKIE_SAMESITE = 'Lax'  # CSRF protection
+
+# Password Validation - Strong passwords required
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,  # Minimum 8 characters
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+# Logging Configuration for Monitoring
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'django.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'accounts': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+        },
+        'attendance': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+        },
+    },
+}
+
 # Email Configuration
 # For development: Console backend (prints emails to console)
 # For production: Configure with real SMTP settings
