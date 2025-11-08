@@ -211,3 +211,56 @@ body {
 .auth-form-wrapper.signup::-webkit-scrollbar-thumb:hover {
     background: #aaa;
 }
+
+/* Mobile Responsive Design - Tablets and smaller */
+@media (max-width: 768px) {
+    body {
+        overflow-y: auto;
+    }
+    
+    .auth-container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+    }
+    
+    /* Hide the image panel on mobile to focus on the form */
+    .auth-info-panel {
+        display: none;
+    }
+    
+    .auth-form-panel {
+        flex: 1;
+        padding: 1.5rem;
+        min-height: 100vh;
+    }
+    
+    .auth-form-wrapper {
+        max-width: 100%;
+    }
+    
+    .auth-form-wrapper h2 {
+        font-size: 1.8rem;
+    }
+}
+
+/* Mobile Responsive Design - Phones */
+@media (max-width: 480px) {
+    .auth-form-panel {
+        padding: 1rem;
+    }
+    
+    .auth-form-wrapper h2 {
+        font-size: 1.5rem;
+    }
+    
+    .form-control {
+        padding: 0.75rem;
+        font-size: 0.95rem;
+    }
+    
+    .btn-submit {
+        padding: 0.85rem;
+        font-size: 1rem;
+    }
+}
