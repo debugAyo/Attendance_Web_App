@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from attendance.models import MemberAttendance, ChurchService
 from accounts.models import Profile
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from django.db.models import Count
 from datetime import datetime, timedelta, date
 from django.contrib import messages
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 import csv
 import json
 
@@ -316,3 +318,98 @@ def remove_admin(request, admin_id):
         messages.error(request, 'Cannot remove a superuser.')
     
     return redirect('admin_settings')
+
+def admin_offline_attendance(request):
+    """Offline attendance page - caches member and service data"""
+    # Get all members
+    members = Profile.objects.filter(role='member').only('id', 'name', 'phone')
+    members_list = [
+        {'id': m.id, 'name': m.name, 'phone': m.phone}
+        for m in members
+    ]
+    
+    # Get active services (last 7 days)
+    week_ago = date.today() - timedelta(days=7)
+    services = ChurchService.objects.filter(date__gte=week_ago).only('id', 'name', 'date')
+    services_list = [
+        {'id': s.id, 'name': s.name, 'date': s.date.isoformat()}
+        for s in services
+    ]
+    
+    context = {
+        'members_json': json.dumps(members_list),
+        'services_json': json.dumps(services_list),
+        'services': services,
+    }
+    
+    return render(request, 'admin_offline_attendance.html', context)
+
+@require_POST
+def sync_offline_attendance(request):
+    """API endpoint to sync offline attendance records"""
+    try:
+        data = json.loads(request.body)
+        attendance_list = data.get('attendance', [])
+        
+        if not attendance_list:
+            return JsonResponse({'success': False, 'error': 'No attendance data provided'})
+        
+        synced_count = 0
+        errors = []
+        
+        for item in attendance_list:
+            try:
+                # Validate required fields
+                member_id = item.get('member_id')
+                service_id = item.get('service_id')
+                timestamp_str = item.get('timestamp')
+                
+                if not all([member_id, service_id, timestamp_str]):
+                    errors.append(f"Missing required fields for {item.get('member_name', 'Unknown')}")
+                    continue
+                
+                # Get member and service
+                member = Profile.objects.get(id=member_id)
+                service = ChurchService.objects.get(id=service_id)
+                
+                # Parse timestamp
+                timestamp = datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+                
+                # Check if attendance already exists (prevent duplicates)
+                existing = MemberAttendance.objects.filter(
+                    phone=member.phone,
+                    service=service,
+                    timestamp__date=timestamp.date()
+                ).exists()
+                
+                if existing:
+                    continue  # Skip duplicates
+                
+                # Create attendance record
+                MemberAttendance.objects.create(
+                    name=member.name,
+                    phone=member.phone,
+                    service=service,
+                    service_code=service.code,
+                    timestamp=timestamp
+                )
+                
+                synced_count += 1
+                
+            except Profile.DoesNotExist:
+                errors.append(f"Member not found: {item.get('member_name', 'Unknown')}")
+            except ChurchService.DoesNotExist:
+                errors.append(f"Service not found: {item.get('service_name', 'Unknown')}")
+            except Exception as e:
+                errors.append(f"Error syncing {item.get('member_name', 'Unknown')}: {str(e)}")
+        
+        return JsonResponse({
+            'success': True,
+            'synced_count': synced_count,
+            'errors': errors if errors else None
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON data'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

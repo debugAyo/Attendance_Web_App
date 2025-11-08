@@ -2,7 +2,8 @@
 from accounts.admin_views import (admin_manage_members, remove_member, edit_member,
                                   admin_todays_attendance, remove_attendance,
                                   admin_summary, admin_settings, add_service, edit_service,
-                                  delete_service, add_admin, remove_admin)
+                                  delete_service, add_admin, remove_admin,
+                                  admin_offline_attendance, sync_offline_attendance)
 """
 URL configuration for rollcall_project project.
 
@@ -41,6 +42,8 @@ urlpatterns = [
     path('admin/settings/service/delete/<int:service_id>/', delete_service, name='delete_service'),
     path('admin/settings/admin/add/', add_admin, name='add_admin'),
     path('admin/settings/admin/remove/<int:admin_id>/', remove_admin, name='remove_admin'),
+    path('admin/offline-attendance/', admin_offline_attendance, name='admin_offline_attendance'),
+    path('admin/sync-offline-attendance/', sync_offline_attendance, name='sync_offline_attendance'),
     
     # Django admin site - this has a catch-all pattern, so it must come after custom admin URLs
     path('admin/', admin.site.urls),
