@@ -68,8 +68,8 @@
                             <select id="service-select" class="form-select form-select-lg">
                                 <option value="">-- Select Service --</option>
                                 {% for service in services %}
-                                <option value="{{ service.id }}" data-name="{{ service.name }}">
-                                    {{ service.name }} - {{ service.date|date:"M d, Y" }}
+                                <option value="{{ service.id }}" data-name="{{ service.name }}" data-code="{{ service.code }}">
+                                    {{ service.name }} (Code: {{ service.code }})
                                 </option>
                                 {% endfor %}
                             </select>
@@ -182,7 +182,8 @@
         document.getElementById('service-select').addEventListener('change', function() {
             selectedService = {
                 id: this.value,
-                name: this.options[this.selectedIndex].dataset.name
+                name: this.options[this.selectedIndex].dataset.name,
+                code: this.options[this.selectedIndex].dataset.code
             };
             updateMarkButton();
         });

@@ -328,11 +328,10 @@ def admin_offline_attendance(request):
         for m in members
     ]
     
-    # Get active services (last 7 days)
-    week_ago = date.today() - timedelta(days=7)
-    services = ChurchService.objects.filter(date__gte=week_ago).only('id', 'name', 'date')
+    # Get all active services
+    services = ChurchService.objects.all().only('id', 'name', 'code')
     services_list = [
-        {'id': s.id, 'name': s.name, 'date': s.date.isoformat()}
+        {'id': s.id, 'name': s.name, 'code': s.code}
         for s in services
     ]
     
