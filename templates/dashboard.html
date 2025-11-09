@@ -826,10 +826,10 @@ const monthlyTrendCtx = document.getElementById('monthlyTrendChart').getContext(
 new Chart(monthlyTrendCtx, {
     type: 'line',
     data: {
-        labels: {{ monthly_labels|safe }},
+        labels: JSON.parse('{{ monthly_labels|escapejs }}'),
         datasets: [{
             label: 'Daily Attendance',
-            data: {{ monthly_data|safe }},
+            data: JSON.parse('{{ monthly_data|escapejs }}'),
             borderColor: '#667eea',
             backgroundColor: 'rgba(102, 126, 234, 0.1)',
             borderWidth: 3,

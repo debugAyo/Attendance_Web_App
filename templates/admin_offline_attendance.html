@@ -168,8 +168,8 @@
     <script src="{% static 'js/offline-attendance.js' %}"></script>
     <script>
         // Cache members and services data on page load
-        const members = {{ members_json|safe }};
-        const services = {{ services_json|safe }};
+        const members = JSON.parse('{{ members_json|escapejs }}');
+        const services = JSON.parse('{{ services_json|escapejs }}');
         
         window.offlineAttendance.cacheMembers(members);
         window.offlineAttendance.cacheServices(services);
