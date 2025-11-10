@@ -244,12 +244,19 @@ def admin_settings(request):
     # Only show admin management to superusers
     admins = None
     if request.user.is_superuser:
-        admins = User.objects.filter(
-            is_superuser=True
-        ) | User.objects.filter(
-            profile__role='admin'
-        ).select_related('profile')
-        admins = admins.distinct().only('id', 'username', 'email', 'is_superuser')
+        # Get all superusers
+        superusers = User.objects.filter(is_superuser=True)
+        
+        # Get users with admin profile (safely handle missing profiles)
+        try:
+            admin_profiles = User.objects.filter(
+                profile__role='admin'
+            ).select_related('profile')
+        except:
+            admin_profiles = User.objects.none()
+        
+        # Combine both querysets
+        admins = (superusers | admin_profiles).distinct().only('id', 'username', 'email', 'is_superuser')
     
     return render(request, 'admin_settings.html', {
         'services': services, 
@@ -290,8 +297,14 @@ def add_admin(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         user = User.objects.create_user(username=username, email=email, password=password)
-        user.profile.role = 'admin'
-        user.profile.save()
+        
+        # Ensure profile exists before setting role
+        if not hasattr(user, 'profile'):
+            Profile.objects.create(user=user, role='admin')
+        else:
+            user.profile.role = 'admin'
+            user.profile.save()
+        
         messages.success(request, f'Admin user {username} created successfully.')
         return redirect('admin_settings')
     return render(request, 'add_admin.html')
