@@ -20,7 +20,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='profile',
             name='name',
-            field=models.CharField(blank=True, max_length=150, null=True),
+            field=models.CharField(max_length=100),
+            preserve_default=False,
         ),
         migrations.AddField(
             model_name='profile',
