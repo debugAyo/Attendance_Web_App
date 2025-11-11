@@ -47,7 +47,7 @@
                                     <i class="fa fa-calendar"></i> Events
                                 </a>
                             </li>
-                            {% if user.is_superuser or user.profile.role == 'admin' %}
+                            {% if user.is_superuser or (hasattr(user, 'profile') and user.profile.role == 'admin') %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'admin_manage_members' %}">
                                     <i class="fa fa-users"></i> Members

@@ -11,7 +11,7 @@
                 <div class="card-header bg-{% if event.event_type == 'service' %}success{% elif event.event_type == 'prayer' %}primary{% elif event.event_type == 'fellowship' %}info{% else %}secondary{% endif %} text-white">
                     <div class="d-flex justify-content-between align-items-center">
                         <h3><i class="fa fa-calendar-check"></i> {{ event.title }}</h3>
-                        {% if user.is_superuser or user.profile.role == 'admin' %}
+                        {% if user.is_superuser or user.profile and user.profile.role == 'admin' %}
                         <a href="{% url 'delete_event' event.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this event?')">
                             <i class="fa fa-trash"></i> Delete
                         </a>
@@ -140,7 +140,7 @@
         
         <!-- Registrations Sidebar -->
         <div class="col-md-4">
-            {% if user.is_superuser or user.profile.role == 'admin' %}
+            {% if user.is_superuser or user.profile and user.profile.role == 'admin' %}
             <div class="card">
                 <div class="card-header bg-primary text-white">
                     <h5><i class="fa fa-users"></i> Registrations ({{ registration_count }})</h5>

@@ -274,6 +274,9 @@ def signup_view(request):
                     how_heard=how_heard if how_heard else None,
                     how_heard_other=how_heard_other if how_heard_other else None
                 )
+                # Store member info in session for pre-filling attendance form
+                request.session['new_member_name'] = name
+                request.session['new_member_phone'] = phone
                 return render(request, 'accounts/signup_success.html', {'name': name})
     else:
         form = SignupForm()

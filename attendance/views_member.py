@@ -34,6 +34,11 @@ def search_members(request):
 # Member attendance marking (no login required)
 def member_mark_attendance(request):
     from .models import MemberAttendance
+    
+    # Check if coming from signup (pre-fill member info)
+    prefill_name = request.session.pop('new_member_name', None)
+    prefill_phone = request.session.pop('new_member_phone', None)
+    
     if request.method == 'POST':
         form = MemberAttendanceForm(request.POST)
         if form.is_valid():
@@ -69,4 +74,10 @@ def member_mark_attendance(request):
                 return redirect('member_mark_attendance')
     else:
         form = MemberAttendanceForm()
-    return render(request, 'attendance/member_mark_attendance.html', {'form': form})
+    
+    context = {
+        'form': form,
+        'prefill_name': prefill_name,
+        'prefill_phone': prefill_phone,
+    }
+    return render(request, 'attendance/member_mark_attendance.html', context)
