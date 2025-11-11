@@ -81,12 +81,12 @@
                     
                     <div class="form-group">
                       <label for="id_name">Full Name*</label>
-                      <input type="text" name="name" id="id_name" class="form-control" value="{% if prefill_name %}{{ prefill_name }}{% endif %}" required {% if not prefill_name %}readonly{% endif %}>
+                      <input type="text" name="name" id="id_name" class="form-control" value="{% if prefill_name %}{{ prefill_name }}{% endif %}" required>
                     </div>
                     
                     <div class="form-group">
                       <label for="id_phone">Phone Number*</label>
-                      <input type="text" name="phone" id="id_phone" class="form-control" value="{% if prefill_phone %}{{ prefill_phone }}{% endif %}" required {% if not prefill_name %}readonly{% endif %}>
+                      <input type="text" name="phone" id="id_phone" class="form-control" value="{% if prefill_phone %}{{ prefill_phone }}{% endif %}" required>
                     </div>
                     
                     <div class="form-group">
@@ -180,27 +180,12 @@
     }
   });
   
-  // Check if this is a new user from signup (has prefilled data)
-  const hasPrefill = {% if prefill_name %}true{% else %}false{% endif %};
-  
-  // If prefilled, make fields editable and enable button
-  if (hasPrefill) {
-    nameInput.removeAttribute('readonly');
-    phoneInput.removeAttribute('readonly');
-    submitBtn.disabled = false;
-  }
-  
-  // Auto-reset form after successful submission (but NOT for new users)
-  {% if messages %}
-  if (!hasPrefill) {
-    setTimeout(() => {
-      document.getElementById('attendanceForm').reset();
-      document.getElementById('id_name').setAttribute('readonly', true);
-      document.getElementById('id_phone').setAttribute('readonly', true);
-      document.getElementById('submitBtn').disabled = true;
-      document.getElementById('id_name_search').focus();
-    }, 3000);
-  }
+  // Auto-reset form after successful submission (only for returning users, not new signups)
+  {% if messages and not prefill_name %}
+  setTimeout(() => {
+    document.getElementById('attendanceForm').reset();
+    document.getElementById('id_name_search').focus();
+  }, 3000);
   {% endif %}
 </script>
 
