@@ -179,14 +179,20 @@
       suggestionsDiv.style.display = 'none';
     }
   });
+  
+  // Auto-reset form after successful submission (but preserve new user pre-fill)
   {% if messages %}
-  setTimeout(() => {
-    document.getElementById('attendanceForm').reset();
-    document.getElementById('id_name').setAttribute('readonly', true);
-    document.getElementById('id_phone').setAttribute('readonly', true);
-    document.getElementById('submitBtn').disabled = true;
-    document.getElementById('id_name_search').focus();
-  }, 3000);
+  const hasPrefill = {% if prefill_name %}true{% else %}false{% endif %};
+  
+  if (!hasPrefill) {
+    setTimeout(() => {
+      document.getElementById('attendanceForm').reset();
+      document.getElementById('id_name').setAttribute('readonly', true);
+      document.getElementById('id_phone').setAttribute('readonly', true);
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('id_name_search').focus();
+    }, 3000);
+  }
   {% endif %}
 </script>
 
