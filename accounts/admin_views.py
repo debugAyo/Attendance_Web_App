@@ -268,16 +268,40 @@ def add_service(request):
     if request.method == 'POST':
         name = request.POST.get('name')
         code = request.POST.get('code')
-        ChurchService.objects.create(name=name, code=code)
+        
+        # Check if service code already exists
+        if ChurchService.objects.filter(code=code).exists():
+            messages.error(request, f'A service with code "{code}" already exists. Please use a unique code.')
+            return render(request, 'add_service.html', {'name': name, 'code': code})
+        
+        try:
+            ChurchService.objects.create(name=name, code=code)
+            messages.success(request, f'Service "{name}" with code "{code}" created successfully!')
+        except Exception as e:
+            messages.error(request, f'Error creating service: {str(e)}')
+        
         return redirect('admin_settings')
     return render(request, 'add_service.html')
 
 def edit_service(request, service_id):
     service = get_object_or_404(ChurchService, id=service_id)
     if request.method == 'POST':
-        service.name = request.POST.get('name')
-        service.code = request.POST.get('code')
-        service.save()
+        new_name = request.POST.get('name')
+        new_code = request.POST.get('code')
+        
+        # Check if new code conflicts with another service
+        if new_code != service.code and ChurchService.objects.filter(code=new_code).exists():
+            messages.error(request, f'A service with code "{new_code}" already exists. Please use a unique code.')
+            return render(request, 'edit_service.html', {'service': service})
+        
+        try:
+            service.name = new_name
+            service.code = new_code
+            service.save()
+            messages.success(request, f'Service "{new_name}" updated successfully!')
+        except Exception as e:
+            messages.error(request, f'Error updating service: {str(e)}')
+        
         return redirect('admin_settings')
     return render(request, 'edit_service.html', {'service': service})
 
