@@ -75,26 +75,34 @@
                     {% csrf_token %}
                     
                     <div class="form-group position-relative">
-                      <label for="id_name_search">Search Your Name*</label>
+                      <label for="id_name_search">Search Your Name or Phone*</label>
                       <input 
                         type="text" 
                         id="id_name_search" 
                         class="form-control" 
-                        placeholder="Type your name or phone number..."
+                        placeholder="Start typing your name or phone number..."
                         autocomplete="off"
                         {% if prefill_name %}value="{{ prefill_name }}"{% endif %}>
                       <div id="suggestions" class="list-group"></div>
-                      <small class="form-text text-muted" style="font-size: 0.8rem;">💡 Start typing to see suggestions</small>
+                      <small class="form-text text-muted" style="font-size: 0.8rem;">
+                        💡 Select yourself from the list or click "I'm a New Member" below
+                      </small>
                     </div>
                     
-                    <div class="form-group">
-                      <label for="id_name">Full Name*</label>
-                      <input type="text" name="name" id="id_name" class="form-control" value="{% if prefill_name %}{{ prefill_name }}{% endif %}" required>
-                    </div>
+                    <!-- Hidden fields that get auto-filled -->
+                    <input type="hidden" name="name" id="id_name" value="{% if prefill_name %}{{ prefill_name }}{% endif %}" required>
+                    <input type="hidden" name="phone" id="id_phone" value="{% if prefill_phone %}{{ prefill_phone }}{% endif %}" required>
                     
-                    <div class="form-group">
-                      <label for="id_phone">Phone Number*</label>
-                      <input type="text" name="phone" id="id_phone" class="form-control" value="{% if prefill_phone %}{{ prefill_phone }}{% endif %}" required>
+                    <!-- Display selected member info -->
+                    <div id="selectedMember" style="display: {% if prefill_name %}block{% else %}none{% endif %}; padding: 1rem; background: #e8f5e9; border-radius: 8px; margin-bottom: 1rem;">
+                      <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                          <strong style="color: #2e7d32;">✓ Selected:</strong>
+                          <div id="selectedName" style="font-weight: 500; color: #333;">{% if prefill_name %}{{ prefill_name }}{% endif %}</div>
+                          <small id="selectedPhone" style="color: #666;">{% if prefill_phone %}{{ prefill_phone }}{% endif %}</small>
+                        </div>
+                        <button type="button" id="clearBtn" class="btn btn-sm btn-outline-secondary">Change</button>
+                      </div>
                     </div>
                     
                     <div class="form-group">
@@ -133,6 +141,31 @@
   const suggestionsDiv = document.getElementById('suggestions');
   const submitBtn = document.getElementById('submitBtn');
   const newMemberBtn = document.getElementById('newMemberBtn');
+  const selectedMemberDiv = document.getElementById('selectedMember');
+  const selectedNameDiv = document.getElementById('selectedName');
+  const selectedPhoneDiv = document.getElementById('selectedPhone');
+  const clearBtn = document.getElementById('clearBtn');
+
+  // Function to show selected member
+  function selectMember(name, phone) {
+    nameInput.value = name;
+    phoneInput.value = phone;
+    selectedNameDiv.textContent = name;
+    selectedPhoneDiv.textContent = phone;
+    selectedMemberDiv.style.display = 'block';
+    searchInput.value = '';
+    suggestionsDiv.style.display = 'none';
+    submitBtn.disabled = false;
+  }
+
+  // Clear selection
+  clearBtn.addEventListener('click', function() {
+    nameInput.value = '';
+    phoneInput.value = '';
+    selectedMemberDiv.style.display = 'none';
+    searchInput.value = '';
+    searchInput.focus();
+  });
 
   searchInput.addEventListener('input', function() {
     clearTimeout(debounceTimer);
@@ -140,6 +173,7 @@
 
     if (query.length < 2) {
       suggestionsDiv.style.display = 'none';
+      newMemberBtn.style.display = 'none';
       return;
     }
 
@@ -158,13 +192,8 @@
               const item = document.createElement('div');
               item.className = 'list-group-item list-group-item-action';
               item.innerHTML = `<div style="color: #333; font-weight: 500;">${member.name}</div><small style="color: #666;">${member.phone}</small>`;
-              item.onclick = (e) => {
-                e.preventDefault();
-                nameInput.value = member.name;
-                phoneInput.value = member.phone;
-                searchInput.value = member.name;
-                suggestionsDiv.style.display = 'none';
-                submitBtn.disabled = false;
+              item.onclick = () => {
+                selectMember(member.name, member.phone);
               };
               suggestionsDiv.appendChild(item);
             });
