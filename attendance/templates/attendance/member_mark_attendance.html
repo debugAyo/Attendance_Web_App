@@ -18,13 +18,21 @@
         border: 1px solid #ddd;
         border-top: none;
         border-radius: 0 0 10px 10px;
+        background-color: white;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
       }
       #suggestions .list-group-item {
         border: none;
         padding: 0.75rem 1rem;
+        color: #333;
+        cursor: pointer;
+        transition: background-color 0.2s;
       }
-      #suggestions a:hover {
+      #suggestions .list-group-item:hover {
         background-color: #f8f9fa;
+      }
+      #suggestions .list-group-item small {
+        color: #666;
       }
       #id_name[readonly], #id_phone[readonly] {
         background-color: #e9ecef;
@@ -147,10 +155,9 @@
           } else {
             newMemberBtn.style.display = 'none';
             data.members.forEach(member => {
-              const item = document.createElement('a');
-              item.href = '#';
+              const item = document.createElement('div');
               item.className = 'list-group-item list-group-item-action';
-              item.innerHTML = `<div>${member.name}</div><small class="text-muted">${member.phone}</small>`;
+              item.innerHTML = `<div style="color: #333; font-weight: 500;">${member.name}</div><small style="color: #666;">${member.phone}</small>`;
               item.onclick = (e) => {
                 e.preventDefault();
                 nameInput.value = member.name;
