@@ -3,7 +3,10 @@ from accounts.admin_views import (admin_manage_members, remove_member, edit_memb
                                   admin_todays_attendance, remove_attendance,
                                   admin_summary, admin_settings, add_service, edit_service,
                                   delete_service, add_admin, remove_admin,
-                                  admin_offline_attendance, sync_offline_attendance)
+                                  admin_offline_attendance, sync_offline_attendance,
+                                  admin_geolocation_dashboard, member_location_history, user_login_history,
+                                  geofence_list, geofence_add, geofence_edit, geofence_delete,
+                                  geofence_toggle, api_validate_location, api_reverse_geocode)
 """
 URL configuration for rollcall_project project.
 
@@ -22,11 +25,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from accounts.views import landing, signup_view, CustomLoginView, home, custom_logout
+from accounts.views import landing, signup_view, CustomLoginView, home, custom_logout, update_login_gps
 from accounts.views_events import events_calendar, add_event, event_detail, register_for_event, delete_event
 from django.urls import path
 from attendance.views import mark_attendance
-from attendance.views_member import member_mark_attendance, search_members
+from attendance.views_member import member_mark_attendance, search_members, check_vpn
 
 urlpatterns = [
     # Custom admin URLs must come BEFORE Django's admin.site.urls
@@ -44,6 +47,20 @@ urlpatterns = [
     path('admin/settings/admin/remove/<int:admin_id>/', remove_admin, name='remove_admin'),
     path('admin/offline-attendance/', admin_offline_attendance, name='admin_offline_attendance'),
     path('admin/sync-offline-attendance/', sync_offline_attendance, name='sync_offline_attendance'),
+    path('admin/geolocation/', admin_geolocation_dashboard, name='admin_geolocation'),
+    path('admin/geolocation/user/<str:member_phone>/', member_location_history, name='user_location_history'),
+    path('admin/geolocation/user-login/<int:user_id>/', user_login_history, name='user_login_history'),
+    
+    # Geofence Management URLs
+    path('admin/geofences/', geofence_list, name='geofence_list'),
+    path('admin/geofences/add/', geofence_add, name='geofence_add'),
+    path('admin/geofences/edit/<int:geofence_id>/', geofence_edit, name='geofence_edit'),
+    path('admin/geofences/delete/<int:geofence_id>/', geofence_delete, name='geofence_delete'),
+    path('admin/geofences/toggle/<int:geofence_id>/', geofence_toggle, name='geofence_toggle'),
+    
+    # Geolocation API endpoints
+    path('api/validate-location/', api_validate_location, name='api_validate_location'),
+    path('api/reverse-geocode/', api_reverse_geocode, name='api_reverse_geocode'),
     
     # Django admin site - this has a catch-all pattern, so it must come after custom admin URLs
     path('admin/', admin.site.urls),
@@ -54,9 +71,11 @@ urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='login'), # login page
     path('home/', home, name='home'),            # dashboard after login
     path('logout/', custom_logout, name='logout'),
+    path('api/update-login-gps/', update_login_gps, name='update_login_gps'),
     path('mark/', mark_attendance, name='mark_attendance'),
     path('member/mark/', member_mark_attendance, name='member_mark_attendance'),
     path('api/search-members/', search_members, name='search_members'),
+    path('api/check-vpn/', check_vpn, name='check_vpn'),
     
     # Events/Calendar URLs
     path('events/', events_calendar, name='events_calendar'),

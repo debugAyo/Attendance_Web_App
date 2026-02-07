@@ -28,8 +28,27 @@
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
             <div class="container-fluid">
-                <a class="navbar-brand fw-bold" href="{% url 'home' %}">
-                    <i class="fa fa-church"></i> RollCall
+                <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'home' %}">
+                    <svg width="28" height="28" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" class="me-2">
+                        <defs>
+                            <linearGradient id="navLogoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="60" cy="60" r="52" fill="url(#navLogoGrad)"/>
+                        <g fill="white">
+                            <rect x="38" y="35" width="44" height="54" rx="5" fill="none" stroke="white" stroke-width="4"/>
+                            <rect x="50" y="29" width="20" height="10" rx="2" fill="white"/>
+                            <line x1="45" y1="52" x2="53" y2="52" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                            <polyline points="57,50 60,53 67,46" fill="none" stroke="#4ade80" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="45" y1="64" x2="53" y2="64" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                            <polyline points="57,62 60,65 67,58" fill="none" stroke="#4ade80" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="45" y1="76" x2="53" y2="76" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                            <polyline points="57,74 60,77 67,70" fill="none" stroke="#4ade80" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </g>
+                    </svg>
+                    RollCall
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
@@ -50,8 +69,17 @@
                             {% if user.is_superuser %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'admin_manage_members' %}">
-                                    <i class="fa fa-users"></i> Members
+                                    <i class="fa fa-users"></i> Users
                                 </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="fa fa-map-marker-alt"></i> Locations
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-dark">
+                                    <li><a class="dropdown-item" href="{% url 'admin_geolocation' %}"><i class="fa fa-globe me-2"></i>Analytics</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'geofence_list' %}"><i class="fa fa-map-pin me-2"></i>Sites</a></li>
+                                </ul>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'admin_settings' %}">
@@ -61,8 +89,17 @@
                             {% elif user.profile and user.profile.role == 'admin' %}
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'admin_manage_members' %}">
-                                    <i class="fa fa-users"></i> Members
+                                    <i class="fa fa-users"></i> Users
                                 </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                    <i class="fa fa-map-marker-alt"></i> Locations
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-dark">
+                                    <li><a class="dropdown-item" href="{% url 'admin_geolocation' %}"><i class="fa fa-globe me-2"></i>Analytics</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'geofence_list' %}"><i class="fa fa-map-pin me-2"></i>Sites</a></li>
+                                </ul>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'admin_settings' %}">

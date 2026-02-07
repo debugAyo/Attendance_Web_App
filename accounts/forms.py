@@ -16,13 +16,13 @@ class SignupForm(forms.Form):
     ]
     HOW_HEARD_CHOICES = [
         ("", "Select an option"),
-        ("evangelism", "Evangelism/Street Outreach"),
+        ("referral", "School Referral"),
         ("friend", "Through a Friend/Family Member"),
         ("social_media", "Social Media (Facebook, Instagram, etc.)"),
-        ("website", "Church Website"),
-        ("passing_by", "Passing By/One-time Visit"),
+        ("website", "School Website"),
+        ("passing_by", "Passing By/Open House Visit"),
         ("relocation", "Relocated to the Area"),
-        ("invitation", "Invited by Church Member"),
+        ("invitation", "Invited by Student/Staff"),
         ("other", "Other"),
     ]
     role = forms.ChoiceField(
@@ -47,10 +47,10 @@ class SignupForm(forms.Form):
         widget=forms.DateInput(attrs={"class": "form-control", "type": "date"}),
         label="Date of Birth"
     )
-    wedding_anniversary = forms.DateField(
+    graduation_year = forms.IntegerField(
         required=False,
-        widget=forms.DateInput(attrs={"class": "form-control", "type": "date"}),
-        label="Wedding Anniversary"
+        widget=forms.NumberInput(attrs={"class": "form-control", "type": "number", "min": 2024, "max": 2050}),
+        label="Expected Graduation Year"
     )
     member_email = forms.EmailField(
         required=False,

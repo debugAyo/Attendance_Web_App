@@ -1,0 +1,797 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Location Analytics Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: all 0.3s ease;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+    }
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .location-badge {
+        font-size: 0.85rem;
+        padding: 0.25rem 0.5rem;
+    }
+    .proxy-warning {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+        border-left: 4px solid #ffc107;
+        border-radius: 12px;
+    }
+    .mobile-badge {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    .table-responsive {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    #map {
+        height: 450px;
+        border-radius: 12px;
+        z-index: 1;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    }
+    .location-card {
+        border-left: 4px solid #0d6efd;
+    }
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 16px;
+        padding: 24px 28px;
+        margin-bottom: 24px;
+    }
+    .page-header h2 {
+        color: white;
+        margin-bottom: 4px;
+    }
+    .page-header p {
+        color: rgba(255,255,255,0.85);
+        margin-bottom: 0;
+    }
+    .page-header .btn {
+        border-color: rgba(255,255,255,0.3);
+        color: white;
+    }
+    .page-header .btn:hover {
+        background: rgba(255,255,255,0.15);
+        border-color: rgba(255,255,255,0.5);
+    }
+    .card {
+        border-radius: 16px;
+        border: none;
+    }
+    .card-header {
+        border-radius: 16px 16px 0 0 !important;
+        padding: 16px 20px;
+    }
+    .table th {
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #6c757d;
+    }
+    .badge {
+        font-weight: 500;
+        padding: 0.35em 0.65em;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h2 class="mb-1">
+                <i class="fas fa-globe me-2"></i>Location Analytics
+            </h2>
+            <p>Track and analyze check-in locations with GPS validation</p>
+        </div>
+        <div class="btn-group">
+            <a href="{% url 'geofence_list' %}" class="btn btn-outline-light">
+                <i class="fas fa-map-marked-alt me-1"></i> Manage Sites
+            </a>
+            <a href="?export=login_csv" class="btn btn-outline-light">
+                <i class="fas fa-download me-1"></i> Logins CSV
+            </a>
+            <a href="?export=attendance_csv" class="btn btn-outline-light">
+                <i class="fas fa-download me-1"></i> Check-ins CSV
+            </a>
+        </div>
+    </div>
+
+    <!-- Test IP Location Tool -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0">
+            <h5 class="mb-0">
+                <i class="fas fa-search-location text-info"></i> Test IP Location Lookup
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-end">
+                <div class="col-md-4 mb-2">
+                    <label class="form-label small text-muted">Enter any public IP address to test</label>
+                    <input type="text" id="testIpInput" class="form-control" 
+                           placeholder="e.g., 8.8.8.8 or 41.190.2.1" 
+                           value="{{ your_ip|default:'' }}">
+                </div>
+                <div class="col-md-3 mb-2">
+                    <button type="button" class="btn btn-primary w-100" onclick="testIpLocation()">
+                        <i class="fas fa-search me-1"></i> Lookup IP
+                    </button>
+                </div>
+                <div class="col-md-5 mb-2">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setTestIp('8.8.8.8')">
+                            Google DNS (USA)
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setTestIp('41.190.2.1')">
+                            Nigeria
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setTestIp('102.89.23.1')">
+                            Lagos
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setTestIp('196.1.2.1')">
+                            South Africa
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="testResult" class="mt-3" style="display: none;">
+                <div class="alert alert-info mb-0">
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" id="testSpinner"></div>
+                        <span id="testResultText">Looking up...</span>
+                    </div>
+                </div>
+            </div>
+            <div id="testResultData" class="mt-3" style="display: none;">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-3">
+                                <h6 class="text-muted mb-2"><i class="fas fa-map-marker-alt text-danger me-1"></i> Location</h6>
+                                <p class="mb-1" id="resultLocation">-</p>
+                                <small class="text-muted" id="resultCoords">-</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card bg-light border-0">
+                            <div class="card-body py-3">
+                                <h6 class="text-muted mb-2"><i class="fas fa-network-wired text-primary me-1"></i> Network</h6>
+                                <p class="mb-1" id="resultISP">-</p>
+                                <small class="text-muted" id="resultFlags">-</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-3">
+                <small class="text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <strong>Your detected IP:</strong> <code>{{ your_ip }}</code>
+                    {% if is_private_ip %}
+                    <span class="badge bg-warning text-dark ms-1">Private/Local IP - Cannot geolocate</span>
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-success bg-opacity-10 rounded-circle p-3">
+                                <i class="fas fa-crosshairs text-success fa-2x"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h3 class="mb-0">{{ stats.gps_attendance_count|default:0 }}</h3>
+                            <p class="text-muted mb-0">GPS Check-ins</p>
+                            <small class="text-success"><i class="fas fa-check"></i> Accurate</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-primary bg-opacity-10 rounded-circle p-3">
+                                <i class="fas fa-map-marker-check text-primary fa-2x"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h3 class="mb-0">{{ stats.within_geofence_count|default:0 }}</h3>
+                            <p class="text-muted mb-0">On-Site Check-ins</p>
+                            <small class="text-primary"><i class="fas fa-building"></i> Within geofence</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-warning bg-opacity-10 rounded-circle p-3">
+                                <i class="fas fa-wifi text-warning fa-2x"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h3 class="mb-0">{{ stats.no_gps_attendance_count|default:0 }}</h3>
+                            <p class="text-muted mb-0">IP-Only Check-ins</p>
+                            <small class="text-warning"><i class="fas fa-exclamation-triangle"></i> Less accurate</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <div class="bg-danger bg-opacity-10 rounded-circle p-3">
+                                <i class="fas fa-shield-alt text-danger fa-2x"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h3 class="mb-0">{{ stats.proxy_logins }}</h3>
+                            <p class="text-muted mb-0">Proxy/VPN Logins</p>
+                            <small class="text-danger"><i class="fas fa-eye"></i> Monitor these</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suspicious Activity Alert -->
+    {% if suspicious_logins %}
+    <div class="alert alert-warning proxy-warning mb-4">
+        <h5><i class="fas fa-shield-alt"></i> Suspicious Activity Detected</h5>
+        <p class="mb-2">The following logins were made from proxy/VPN IP addresses:</p>
+        <ul class="mb-0">
+            {% for login in suspicious_logins %}
+            <li>
+                <strong>{{ login.user.username }}</strong> - 
+                {{ login.geolocation.location_display }} 
+                ({{ login.login_time|date:"M d, Y H:i" }})
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Top Countries -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-flag text-primary"></i> Top Login Countries
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.top_login_countries %}
+                    <div class="list-group list-group-flush">
+                        {% for country in stats.top_login_countries %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span>
+                                <i class="fas fa-globe-africa text-muted me-2"></i>
+                                {{ country.geolocation__country|default:"Unknown" }}
+                            </span>
+                            <span class="badge bg-primary rounded-pill">{{ country.count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">No location data available yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Cities -->
+        <div class="col-md-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-city text-success"></i> Top Attendance Cities
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.top_attendance_cities %}
+                    <div class="list-group list-group-flush">
+                        {% for city in stats.top_attendance_cities %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span>
+                                <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                {{ city.geolocation__city|default:"Unknown" }}, {{ city.geolocation__country }}
+                            </span>
+                            <span class="badge bg-success rounded-pill">{{ city.count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center">No location data available yet</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Tables -->
+    <div class="row">
+        <!-- Recent Logins -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-sign-in-alt text-primary"></i> Recent Admin Logins
+                    </h5>
+                    <span class="badge bg-primary">{{ stats.total_logins }} total</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Location</th>
+                                    <th>IP</th>
+                                    <th>Time</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for login in recent_logins %}
+                                <tr {% if login.geolocation.is_proxy %}class="table-warning"{% endif %}>
+                                    <td>
+                                        <strong>{{ login.user.username }}</strong>
+                                        {% if login.geolocation.is_proxy %}
+                                        <span class="badge bg-warning text-dark ms-1" title="VPN/Proxy">
+                                            <i class="fas fa-mask"></i>
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if login.device_latitude and login.device_longitude %}
+                                            <small>
+                                                <i class="fas fa-crosshairs text-success" title="GPS Location"></i>
+                                                <a href="https://www.google.com/maps?q={{ login.device_latitude }},{{ login.device_longitude }}" 
+                                                   target="_blank" class="text-decoration-none">
+                                                    GPS: {{ login.device_latitude|floatformat:4 }}, {{ login.device_longitude|floatformat:4 }}
+                                                </a>
+                                            </small>
+                                        {% elif login.geolocation %}
+                                            <small>
+                                                <i class="fas fa-map-marker-alt text-danger"></i>
+                                                {{ login.geolocation.city|default:"Unknown" }}, {{ login.geolocation.country|default:"" }}
+                                            </small>
+                                        {% else %}
+                                            <small class="text-muted">Local/Private IP</small>
+                                        {% endif %}
+                                    </td>
+                                    <td><code class="small">{{ login.ip_address }}</code></td>
+                                    <td><small>{{ login.login_time|date:"M d, H:i" }}</small></td>
+                                    <td>
+                                        <a href="{% url 'user_login_history' login.user.id %}" 
+                                           class="btn btn-sm btn-outline-primary" title="View History">
+                                            <i class="fas fa-history"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">
+                                        <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                                        No login records yet
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Attendance Locations -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-check-circle text-success"></i> Recent Check-in Locations
+                    </h5>
+                    <span class="badge bg-success">{{ stats.total_attendance_locations }} total</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>User</th>
+                                    <th>Location</th>
+                                    <th>Session</th>
+                                    <th>Time</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for att in recent_attendance %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ att.member_name }}</strong>
+                                        {% if att.device_latitude and att.device_longitude %}
+                                        <span class="badge bg-success ms-1" title="GPS Verified">
+                                            <i class="fas fa-crosshairs"></i>
+                                        </span>
+                                        {% endif %}
+                                        {% if att.geolocation.is_mobile %}
+                                        <span class="badge mobile-badge ms-1" title="Mobile Device">
+                                            <i class="fas fa-mobile-alt"></i>
+                                        </span>
+                                        {% endif %}
+                                        <br><small class="text-muted">{{ att.member_phone }}</small>
+                                    </td>
+                                    <td>
+                                        {% if att.device_latitude and att.device_longitude %}
+                                            <!-- GPS Location (Primary - Accurate) -->
+                                            <div class="mb-1">
+                                                <span class="badge bg-success"><i class="fas fa-crosshairs"></i> GPS</span>
+                                                <a href="https://www.google.com/maps?q={{ att.device_latitude }},{{ att.device_longitude }}" 
+                                                   target="_blank" class="text-decoration-none small">
+                                                    {{ att.device_latitude|floatformat:5 }}, {{ att.device_longitude|floatformat:5 }}
+                                                </a>
+                                            </div>
+                                            {% if att.gps_accuracy %}
+                                            <small class="text-muted">
+                                                <i class="fas fa-bullseye"></i> ±{{ att.gps_accuracy|floatformat:0 }}m accuracy
+                                            </small>
+                                            {% endif %}
+                                            {% if att.is_within_geofence %}
+                                            <span class="badge bg-primary ms-1" title="Within approved location">
+                                                <i class="fas fa-map-marker-check"></i> On-site
+                                            </span>
+                                            {% elif att.distance_from_site %}
+                                            <span class="badge bg-warning text-dark ms-1" title="{{ att.distance_from_site|floatformat:0 }}m from site">
+                                                <i class="fas fa-map-marker-alt"></i> {{ att.distance_from_site|floatformat:0 }}m away
+                                            </span>
+                                            {% endif %}
+                                        {% elif att.geolocation %}
+                                            <!-- IP Location (Fallback - Less Accurate) -->
+                                            <div class="mb-1">
+                                                <span class="badge bg-secondary" title="IP-based location (less accurate)">
+                                                    <i class="fas fa-wifi"></i> IP
+                                                </span>
+                                                <small class="ms-1">
+                                                    {{ att.geolocation.city|default:"Unknown" }}, {{ att.geolocation.country|default:"" }}
+                                                </small>
+                                            </div>
+                                            <small class="text-warning">
+                                                <i class="fas fa-exclamation-triangle"></i> No GPS - may be inaccurate
+                                            </small>
+                                        {% else %}
+                                            <small class="text-muted">
+                                                <i class="fas fa-question-circle"></i> Local/Private IP
+                                            </small>
+                                        {% endif %}
+                                    </td>
+                                    <td><small>{{ att.service_name|default:"N/A" }}</small></td>
+                                    <td><small>{{ att.timestamp|date:"M d, H:i" }}</small></td>
+                                    <td>
+                                        <a href="{% url 'user_location_history' att.member_phone|urlencode %}" 
+                                           class="btn btn-sm btn-outline-success" title="View History">
+                                            <i class="fas fa-history"></i>
+                                        </a>
+                                        {% if att.device_latitude and att.device_longitude %}
+                                        <a href="https://www.google.com/maps?q={{ att.device_latitude }},{{ att.device_longitude }}" 
+                                           target="_blank" class="btn btn-sm btn-outline-primary" title="View on Map">
+                                            <i class="fas fa-map"></i>
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">
+                                        <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                                        No check-in records with location data yet
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-map-marked-alt text-info"></i> Check-in Locations Map
+            </h5>
+            <div class="btn-group btn-group-sm">
+                <button type="button" class="btn btn-outline-secondary active" onclick="setMapType('roadmap')">
+                    <i class="fas fa-road"></i> Road
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="setMapType('satellite')">
+                    <i class="fas fa-satellite"></i> Satellite
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="setMapType('hybrid')">
+                    <i class="fas fa-layer-group"></i> Hybrid
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-0 position-relative">
+            <!-- Map Legend -->
+            <div class="map-legend position-absolute" style="top: 10px; left: 10px; z-index: 5; background: white; padding: 10px 15px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); font-size: 0.85rem;">
+                <div class="d-flex align-items-center mb-2">
+                    <span style="display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: #28a745; margin-right: 8px;"></span>
+                    <span><strong>GPS</strong> - Accurate location</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span style="display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: #0d6efd; margin-right: 8px;"></span>
+                    <span><strong>IP</strong> - Approximate (city-level)</span>
+                </div>
+            </div>
+            <div id="map"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Google Maps JS -->
+<script>
+const mapData = {{ map_data_json|safe }};
+let map;
+let markers = [];
+let infoWindow;
+
+function initMap() {
+    // Default center - Nigeria
+    let center = { lat: 9.0820, lng: 7.4951 };
+    let zoom = 5;
+    
+    if (mapData.length > 0) {
+        center = { lat: mapData[0].lat, lng: mapData[0].lng };
+        zoom = 10;
+    }
+    
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: center,
+        zoom: zoom,
+        mapTypeId: 'roadmap',
+        mapTypeControl: false,  // We use our custom buttons
+        streetViewControl: true,
+        fullscreenControl: true,
+        zoomControl: true,
+        styles: [
+            {
+                featureType: "poi",
+                elementType: "labels",
+                stylers: [{ visibility: "off" }]
+            }
+        ]
+    });
+    
+    infoWindow = new google.maps.InfoWindow();
+    
+    // Add markers for each location
+    mapData.forEach((loc, index) => {
+        // GPS locations are green, IP-based are blue
+        const isGps = loc.is_gps || false;
+        const markerColor = isGps ? '#28a745' : '#0d6efd';
+        const markerLabel = isGps ? 'GPS' : 'IP';
+        
+        const marker = new google.maps.Marker({
+            position: { lat: loc.lat, lng: loc.lng },
+            map: map,
+            title: loc.city || 'Unknown',
+            animation: google.maps.Animation.DROP,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: Math.min(12, 6 + loc.count),
+                fillColor: markerColor,
+                fillOpacity: 0.9,
+                strokeColor: '#ffffff',
+                strokeWeight: 2
+            }
+        });
+        
+        const infoContent = `
+            <div style="min-width: 180px; padding: 8px;">
+                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                    <span style="background: ${markerColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">
+                        ${markerLabel}
+                    </span>
+                    <h6 style="margin: 0 0 0 8px; font-weight: 600; color: #333;">
+                        ${loc.city || 'Unknown Location'}
+                    </h6>
+                </div>
+                <p style="margin: 0 0 8px 0; color: #666; font-size: 0.9rem;">
+                    ${loc.country || ''}
+                </p>
+                ${isGps ? `
+                    <p style="margin: 0 0 8px 0; color: #28a745; font-size: 0.8rem;">
+                        <i class="fas fa-check-circle"></i> Precise GPS location
+                    </p>
+                ` : `
+                    <p style="margin: 0 0 8px 0; color: #6c757d; font-size: 0.8rem;">
+                        <i class="fas fa-wifi"></i> IP-based (approximate)
+                    </p>
+                `}
+                <div style="background: #e7f3ff; padding: 8px 12px; border-radius: 8px; text-align: center;">
+                    <span style="font-size: 1.2rem; font-weight: 700; color: ${markerColor};">${loc.count}</span>
+                    <span style="font-size: 0.85rem; color: #666;"> check-ins</span>
+                </div>
+            </div>
+        `;
+        
+        marker.addListener('click', () => {
+            infoWindow.setContent(infoContent);
+            infoWindow.open(map, marker);
+        });
+        
+        markers.push(marker);
+    });
+    
+    // Fit bounds to show all markers
+    if (mapData.length > 1) {
+        const bounds = new google.maps.LatLngBounds();
+        mapData.forEach(loc => {
+            bounds.extend({ lat: loc.lat, lng: loc.lng });
+        });
+        map.fitBounds(bounds, { padding: 50 });
+    }
+}
+
+function setMapType(type) {
+    if (map) {
+        map.setMapTypeId(type);
+        // Update button states
+        document.querySelectorAll('.btn-group-sm .btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.closest('.btn').classList.add('active');
+    }
+}
+
+// Load Google Maps API
+function loadGoogleMaps() {
+    const apiKey = '{{ google_maps_api_key|default:"" }}';
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+}
+
+document.addEventListener('DOMContentLoaded', loadGoogleMaps);
+
+// IP Lookup Test Functions
+function setTestIp(ip) {
+    document.getElementById('testIpInput').value = ip;
+    testIpLocation();
+}
+
+function testIpLocation() {
+    const ip = document.getElementById('testIpInput').value.trim();
+    if (!ip) {
+        alert('Please enter an IP address');
+        return;
+    }
+    
+    // Validate IP format (basic check)
+    const ipPattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+    if (!ipPattern.test(ip)) {
+        alert('Please enter a valid IPv4 address (e.g., 8.8.8.8)');
+        return;
+    }
+    
+    // Check for private IPs
+    if (ip.startsWith('192.168.') || ip.startsWith('10.') || ip === '127.0.0.1' || ip.startsWith('172.16.')) {
+        document.getElementById('testResult').style.display = 'none';
+        document.getElementById('testResultData').style.display = 'block';
+        document.getElementById('resultLocation').innerHTML = '<span class="text-danger">Private/Local IP - Cannot geolocate</span>';
+        document.getElementById('resultCoords').textContent = 'This IP is not routable on the internet';
+        document.getElementById('resultISP').textContent = 'Local Network';
+        document.getElementById('resultFlags').textContent = '';
+        return;
+    }
+    
+    // Show loading
+    document.getElementById('testResult').style.display = 'block';
+    document.getElementById('testResultData').style.display = 'none';
+    document.getElementById('testSpinner').style.display = 'inline-block';
+    document.getElementById('testResultText').textContent = 'Looking up ' + ip + '...';
+    
+    // Use ip-api.com (free, no API key needed)
+    fetch(`http://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,mobile,proxy,hosting`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('testResult').style.display = 'none';
+            document.getElementById('testResultData').style.display = 'block';
+            
+            if (data.status === 'success') {
+                document.getElementById('resultLocation').innerHTML = `
+                    <strong>${data.city || 'Unknown'}</strong>, ${data.regionName || ''}<br>
+                    <span class="text-muted">${data.country || ''}</span>
+                `;
+                document.getElementById('resultCoords').textContent = `Lat: ${data.lat}, Lng: ${data.lon}`;
+                document.getElementById('resultISP').textContent = data.isp || 'Unknown';
+                
+                let flags = [];
+                if (data.mobile) flags.push('<span class="badge bg-info">Mobile</span>');
+                if (data.proxy) flags.push('<span class="badge bg-warning text-dark">Proxy/VPN</span>');
+                if (data.hosting) flags.push('<span class="badge bg-secondary">Hosting/Datacenter</span>');
+                document.getElementById('resultFlags').innerHTML = flags.join(' ') || 'Regular ISP';
+                
+                // Show on map if available
+                if (map && data.lat && data.lon) {
+                    const testMarker = new google.maps.Marker({
+                        position: { lat: data.lat, lng: data.lon },
+                        map: map,
+                        title: 'Test IP: ' + ip,
+                        animation: google.maps.Animation.BOUNCE,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 14,
+                            fillColor: '#dc3545',
+                            fillOpacity: 1,
+                            strokeColor: '#ffffff',
+                            strokeWeight: 3
+                        }
+                    });
+                    map.setCenter({ lat: data.lat, lng: data.lon });
+                    map.setZoom(12);
+                    
+                    // Stop bouncing after 2 seconds
+                    setTimeout(() => testMarker.setAnimation(null), 2000);
+                }
+            } else {
+                document.getElementById('resultLocation').innerHTML = `<span class="text-danger">${data.message || 'Lookup failed'}</span>`;
+                document.getElementById('resultCoords').textContent = '';
+                document.getElementById('resultISP').textContent = '-';
+                document.getElementById('resultFlags').textContent = '';
+            }
+        })
+        .catch(error => {
+            document.getElementById('testResult').style.display = 'none';
+            document.getElementById('testResultData').style.display = 'block';
+            document.getElementById('resultLocation').innerHTML = '<span class="text-danger">Error: Could not fetch location</span>';
+            document.getElementById('resultCoords').textContent = error.message;
+            document.getElementById('resultISP').textContent = '-';
+            document.getElementById('resultFlags').textContent = '';
+        });
+}
+</script>
+{% endblock %}

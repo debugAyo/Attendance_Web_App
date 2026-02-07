@@ -10,6 +10,14 @@
 - **CSRF Protection**: Enabled on all forms
 - **Login Required**: Decorators on sensitive views
 
+### ✅ Location Security (NEW!)
+- **GPS Permission Required**: Browser prompts user before sharing location
+- **HTTPS Required**: GPS only works over secure connections
+- **High Accuracy Mode**: Uses device GPS (not just WiFi/Cell towers)
+- **Geofence Validation**: Server-side verification of check-in locations
+- **Location Data Encryption**: Coordinates encrypted in transit
+- **Privacy Controls**: Users can deny location permission (falls back to IP)
+
 ### ✅ Network Security
 - **HTTPS Only**: Render provides automatic SSL/TLS
 - **Secure Headers**:
@@ -210,6 +218,16 @@ Currently:
 - Login/logout events (Django default)
 - Password changes
 - Admin actions (Django admin history)
+- **GPS Location on Login** (NEW!)
+  - Exact coordinates (latitude/longitude)
+  - IP address and approximate city
+  - Device information
+  - GPS accuracy level
+- **Attendance Location** (NEW!)
+  - Check-in coordinates
+  - Geofence verification status
+  - Inside/outside geofence indicator
+  - Distance from geofence center
 
 ### To Implement:
 
@@ -218,6 +236,7 @@ Currently:
 # Log when admin adds/edits/deletes members
 # Log when admin changes service codes
 # Log when admin exports data
+# Log geofence creation/modification
 ```
 
 **Usage:**
@@ -354,8 +373,8 @@ python manage.py shell
 
 1. **Welcome email with instructions**
 2. **Link to USER_GUIDE.md**
-3. **Demo at church service**
-4. **Help desk at church**
+3. **Demo at school service**
+4. **Help desk at school**
 
 ---
 
@@ -367,7 +386,7 @@ python manage.py shell
 
 **Data Issues:**
 - Database Admin: [Contact]
-- Church IT: [Contact]
+- school IT: [Contact]
 
 **Security Incident:**
 - Report immediately to developer
@@ -426,5 +445,5 @@ Track these over time:
 
 **This guide should be reviewed and updated quarterly.**
 
-Last Updated: November 2025  
-Next Review: February 2026
+Last Updated: January 2026  
+Next Review: April 2026

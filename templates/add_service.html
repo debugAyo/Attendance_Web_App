@@ -5,20 +5,20 @@
     <div class="row justify-content-center">
         <div class="col-md-6">
             <div class="card">
-                <div class="card-header"><h4>Add Church Service</h4></div>
+                <div class="card-header"><h4>Add Session</h4></div>
                 <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <label for="name" class="form-label">Service Name</label>
+                            <label for="name" class="form-label">Session Name</label>
                             <input type="text" class="form-control" name="name" required>
                         </div>
                         <div class="mb-3">
-                            <label for="code" class="form-label">Service Code</label>
+                            <label for="code" class="form-label">Session Code</label>
                             <input type="text" class="form-control" name="code" required>
-                            <small class="form-text text-muted">Members will use this code to mark attendance.</small>
+                            <small class="form-text text-muted">Users will use this code to mark attendance.</small>
                         </div>
-                        <button type="submit" class="btn btn-primary">Add Service</button>
+                        <button type="submit" class="btn btn-primary">Add Session</button>
                         <a href="{% url 'admin_settings' %}" class="btn btn-secondary">Cancel</a>
                     </form>
                 </div>

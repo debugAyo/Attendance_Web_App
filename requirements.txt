@@ -21,3 +21,7 @@ crispy-bootstrap5==2025.6
 # Utilities
 python-dateutil==2.9.0.post0
 pytz==2025.2
+python-dotenv==1.0.1
+
+# IP Geolocation
+requests==2.32.3

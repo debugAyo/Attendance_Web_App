@@ -259,9 +259,9 @@
         <div class="col-md-3 col-sm-6">
             <div class="stat-card primary">
                 <i class="fa fa-users stat-icon"></i>
-                <div class="stat-label">Total Members</div>
+                <div class="stat-label">Total Students</div>
                 <div class="stat-value text-primary">{{ total_members }}</div>
-                <small class="text-muted"><i class="fa fa-chart-line"></i> Active Members</small>
+                <small class="text-muted"><i class="fa fa-chart-line"></i> Active Students</small>
             </div>
         </div>
         
@@ -277,7 +277,7 @@
         <div class="col-md-3 col-sm-6">
             <div class="stat-card warning">
                 <i class="fa fa-male stat-icon"></i>
-                <div class="stat-label">Male Members</div>
+                <div class="stat-label">Male Students</div>
                 <div class="stat-value text-warning">{{ male_count }}</div>
                 <small class="text-muted">{{ male_percentage }}% of total</small>
             </div>
@@ -286,7 +286,7 @@
         <div class="col-md-3 col-sm-6">
             <div class="stat-card danger">
                 <i class="fa fa-female stat-icon"></i>
-                <div class="stat-label">Female Members</div>
+                <div class="stat-label">Female Students</div>
                 <div class="stat-value text-danger">{{ female_count }}</div>
                 <small class="text-muted">{{ female_percentage }}% of total</small>
             </div>
@@ -297,8 +297,8 @@
     <div class="row">
         <div class="col-md-3 col-sm-6">
             <div class="stat-card info">
-                <i class="fa fa-child stat-icon"></i>
-                <div class="stat-label">Children</div>
+                <i class="fa fa-graduation-cap stat-icon"></i>
+                <div class="stat-label">Junior Students</div>
                 <div class="stat-value text-info">{{ children_count }}</div>
                 <small class="text-muted">Under 13 years</small>
             </div>
@@ -306,8 +306,8 @@
         
         <div class="col-md-3 col-sm-6">
             <div class="stat-card primary">
-                <i class="fa fa-church stat-icon"></i>
-                <div class="stat-label">Total Services</div>
+                <i class="fa fa-calendar-check stat-icon"></i>
+                <div class="stat-label">Total Classes</div>
                 <div class="stat-value text-primary">{{ total_attendance }}</div>
                 <small class="text-muted">All Time</small>
             </div>
@@ -318,7 +318,7 @@
                 <i class="fa fa-user-plus stat-icon"></i>
                 <div class="stat-label">New This Month</div>
                 <div class="stat-value text-success">{{ new_members_this_month }}</div>
-                <small class="text-muted">New Registrations</small>
+                <small class="text-muted">New Enrollments</small>
             </div>
         </div>
         
@@ -327,7 +327,7 @@
                 <i class="fa fa-exclamation-triangle stat-icon"></i>
                 <div class="stat-label">Absentees</div>
                 <div class="stat-value text-warning">{{ absentee_members|length }}</div>
-                <small class="text-muted">Missed 2+ Services</small>
+                <small class="text-muted">Missed 2+ Classes</small>
             </div>
         </div>
     </div>
@@ -350,7 +350,7 @@
                                     <th>#</th>
                                     <th>Name</th>
                                     <th>Phone</th>
-                                    <th>Service</th>
+                                    <th>Class</th>
                                     <th>Time</th>
                                 </tr>
                             </thead>
@@ -396,10 +396,10 @@
                 </div>
             </div>
             
-            <!-- Service Breakdown -->
+            <!-- Class Breakdown -->
             <div class="card-modern">
                 <div class="card-header">
-                    <i class="fa fa-list-alt text-info"></i> Service Breakdown
+                    <i class="fa fa-list-alt text-info"></i> Class Breakdown
                 </div>
                 <div class="card-body">
                     {% if service_attendance %}
@@ -407,7 +407,7 @@
                         <table class="table table-modern">
                             <thead>
                                 <tr>
-                                    <th>Service Name</th>
+                                    <th>Class Name</th>
                                     <th>Date</th>
                                     <th>Code</th>
                                     <th class="text-end">Attendance</th>
@@ -426,7 +426,7 @@
                         </table>
                     </div>
                     {% else %}
-                    <p class="text-muted text-center py-3">No service data available.</p>
+                    <p class="text-muted text-center py-3">No class data available.</p>
                     {% endif %}
                 </div>
             </div>
@@ -446,7 +446,7 @@
                     </a>
                     <a href="{% url 'admin_manage_members' %}" class="quick-action-btn">
                         <i class="fa fa-users text-primary"></i>
-                        <span>Manage Members</span>
+                        <span>Manage Students</span>
                     </a>
                     <a href="{% url 'events_calendar' %}" class="quick-action-btn">
                         <i class="fa fa-calendar text-info"></i>
@@ -502,7 +502,7 @@
                 <h6 class="alert-heading">
                     <i class="fa fa-exclamation-triangle"></i> Absentee Alert
                 </h6>
-                <p class="mb-2"><strong>{{ absentee_members|length }}</strong> member(s) missed the last 2 services.</p>
+                <p class="mb-2"><strong>{{ absentee_members|length }}</strong> student(s) missed the last 2 classes.</p>
                 <hr>
                 <div class="accordion" id="absenteeAccordion">
                     {% for member in absentee_members %}
@@ -524,9 +524,9 @@
                                 <p class="mb-1"><i class="fa fa-times text-danger"></i> <strong>Last Attended:</strong> Never</p>
                                 {% endif %}
                                 {% if member.is_child %}
-                                <span class="badge bg-warning text-dark"><i class="fa fa-child"></i> Child ({{ member.age }} years)</span>
+                                <span class="badge bg-warning text-dark"><i class="fa fa-graduation-cap"></i> Junior Student ({{ member.age }} years)</span>
                                 {% else %}
-                                <span class="badge bg-info"><i class="fa fa-user"></i> Adult</span>
+                                <span class="badge bg-info"><i class="fa fa-user"></i> Senior Student</span>
                                 {% endif %}
                                 <div class="mt-2">
                                     <a href="tel:{{ member.phone }}" class="btn btn-sm btn-primary me-1">
@@ -546,11 +546,11 @@
             </div>
             {% endif %}
             
-            <!-- Inactive Members -->
+            <!-- Inactive Students -->
             {% if inactive_members %}
             <div class="card-modern">
                 <div class="card-header">
-                    <i class="fa fa-user-clock text-warning"></i> Inactive Members
+                    <i class="fa fa-user-clock text-warning"></i> Inactive Students
                     <span class="badge bg-warning text-dark float-end">30+ Days</span>
                 </div>
                 <div class="card-body">
@@ -617,10 +617,10 @@
             </div>
             {% endif %}
             
-            <!-- Member Demographics -->
+            <!-- Student Demographics -->
             <div class="card-modern">
                 <div class="card-header">
-                    <i class="fa fa-chart-pie text-success"></i> Demographics
+                    <i class="fa fa-chart-pie text-success"></i> Student Demographics
                 </div>
                 <div class="card-body">
                     <canvas id="demographicsChart" height="200"></canvas>
@@ -642,7 +642,7 @@
                         </div>
                         
                         <div class="d-flex justify-content-between mb-2">
-                            <span><i class="fa fa-child text-info"></i> Children</span>
+                            <span><i class="fa fa-graduation-cap text-info"></i> Junior Students</span>
                             <strong>{{ children_count }} ({{ children_percentage }}%)</strong>
                         </div>
                         <div class="progress-custom">
@@ -709,7 +709,7 @@ const demographicsCtx = document.getElementById('demographicsChart').getContext(
 new Chart(demographicsCtx, {
     type: 'doughnut',
     data: {
-        labels: ['Male', 'Female', 'Children'],
+        labels: ['Male', 'Female', 'Junior Students'],
         datasets: [{
             data: [{{ male_count }}, {{ female_count }}, {{ children_count }}],
             backgroundColor: ['#667eea', '#dc3545', '#17a2b8'],
@@ -733,6 +733,106 @@ new Chart(demographicsCtx, {
         }
     }
 });
+</script>
+
+<!-- GPS Location Capture for Login Tracking -->
+<script>
+(function() {
+    // Only run once per session
+    if (sessionStorage.getItem('gpsLocationSent')) return;
+    
+    if ('geolocation' in navigator) {
+        let watchId = null;
+        let bestPosition = null;
+        let attempts = 0;
+        const maxAttempts = 10;
+        const targetAccuracy = 15; // meters
+        const maxWaitTime = 20000; // 20 seconds
+        const startTime = Date.now();
+        
+        function sendPosition() {
+            if (!bestPosition) return;
+            
+            fetch('{% url "update_login_gps" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    latitude: bestPosition.latitude,
+                    longitude: bestPosition.longitude,
+                    accuracy: bestPosition.accuracy
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    console.log('GPS location recorded:', data.location, 'Accuracy:', Math.round(bestPosition.accuracy) + 'm');
+                    sessionStorage.setItem('gpsLocationSent', 'true');
+                }
+            })
+            .catch(error => console.log('GPS update failed:', error));
+        }
+        
+        function stopWatching() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+        }
+        
+        function processPosition(position) {
+            attempts++;
+            const accuracy = position.coords.accuracy;
+            
+            // Track best position
+            if (!bestPosition || accuracy < bestPosition.accuracy) {
+                bestPosition = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: accuracy
+                };
+            }
+            
+            const elapsed = Date.now() - startTime;
+            
+            // Stop if we got good accuracy, max attempts, or timeout
+            if (accuracy <= targetAccuracy || attempts >= maxAttempts || elapsed >= maxWaitTime) {
+                stopWatching();
+                sendPosition();
+            }
+        }
+        
+        // Use watchPosition for better accuracy
+        watchId = navigator.geolocation.watchPosition(
+            processPosition,
+            function(error) {
+                stopWatching();
+                if (bestPosition) {
+                    sendPosition();
+                } else {
+                    console.log('GPS not available:', error.message);
+                }
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0  // Always get fresh position
+            }
+        );
+        
+        // Safety timeout
+        setTimeout(() => {
+            if (watchId !== null) {
+                stopWatching();
+                if (bestPosition) {
+                    sendPosition();
+                }
+            }
+        }, maxWaitTime + 1000);
+    }
+})();
 </script>
 {% endblock %}
 </body>

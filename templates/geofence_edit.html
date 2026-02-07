@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Location - {{ geofence.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    #map {
+        height: 400px;
+        border-radius: 8px;
+        cursor: crosshair;
+    }
+    .coordinate-input {
+        font-family: monospace;
+        font-size: 0.9rem;
+    }
+    .radius-preview {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: rgba(13, 110, 253, 0.2);
+        border: 2px solid #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'geofence_list' %}">Site Locations</a></li>
+            <li class="breadcrumb-item active">Edit: {{ geofence.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h4 class="mb-0">
+                        <i class="fas fa-edit text-primary"></i> Edit Site Location
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="geofenceForm">
+                        {% csrf_token %}
+                        
+                        <!-- Map Section -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">
+                                <i class="fas fa-map"></i> Adjust Location on Map
+                            </label>
+                            <div id="map" class="mb-2"></div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="getCurrentLocation()">
+                                    <i class="fas fa-crosshairs"></i> Get My Location
+                                </button>
+                                <span id="gpsStatus" class="text-muted">
+                                    <i class="fas fa-check-circle text-success"></i> Location set
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label fw-bold">Location Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       value="{{ geofence.name }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="site_type" class="form-label fw-bold">Site Type</label>
+                                <select class="form-select" id="site_type" name="site_type">
+                                    {% for value, label in site_types %}
+                                    <option value="{{ value }}" {% if geofence.site_type == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label fw-bold">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="2">{{ geofence.description }}</textarea>
+                        </div>
+
+                        <!-- GPS Coordinates -->
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="latitude" class="form-label fw-bold">Latitude *</label>
+                                <input type="number" class="form-control coordinate-input" id="latitude" 
+                                       name="latitude" step="0.0000001" min="-90" max="90" required
+                                       value="{{ geofence.latitude }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="longitude" class="form-label fw-bold">Longitude *</label>
+                                <input type="number" class="form-control coordinate-input" id="longitude" 
+                                       name="longitude" step="0.0000001" min="-180" max="180" required
+                                       value="{{ geofence.longitude }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="radius" class="form-label fw-bold">Radius (meters)</label>
+                                <input type="number" class="form-control" id="radius" name="radius" 
+                                       value="{{ geofence.radius }}" min="10" max="10000">
+                            </div>
+                        </div>
+
+                        <!-- Address Fields -->
+                        <hr class="my-4">
+                        <h6 class="mb-3"><i class="fas fa-home"></i> Address Information</h6>
+                        
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Street Address</label>
+                            <input type="text" class="form-control" id="address" name="address"
+                                   value="{{ geofence.address }}">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="city" class="form-label">City</label>
+                                <input type="text" class="form-control" id="city" name="city"
+                                       value="{{ geofence.city }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="state" class="form-label">State/Province</label>
+                                <input type="text" class="form-control" id="state" name="state"
+                                       value="{{ geofence.state }}">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="country" class="form-label">Country</label>
+                                <input type="text" class="form-control" id="country" name="country"
+                                       value="{{ geofence.country }}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="postal_code" class="form-label">Postal Code</label>
+                                <input type="text" class="form-control" id="postal_code" name="postal_code"
+                                       value="{{ geofence.postal_code }}">
+                            </div>
+                        </div>
+
+                        <!-- Settings -->
+                        <hr class="my-4">
+                        <h6 class="mb-3"><i class="fas fa-cog"></i> Settings</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="is_active" 
+                                           name="is_active" {% if geofence.is_active %}checked{% endif %}>
+                                    <label class="form-check-label" for="is_active">
+                                        <strong>Active</strong>
+                                        <br><small class="text-muted">Accept check-ins</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="require_gps" 
+                                           name="require_gps" {% if geofence.require_gps %}checked{% endif %}>
+                                    <label class="form-check-label" for="require_gps">
+                                        <strong>Require GPS</strong>
+                                        <br><small class="text-muted">Verify via GPS</small>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="allow_remote" 
+                                           name="allow_remote" {% if geofence.allow_remote %}checked{% endif %}>
+                                    <label class="form-check-label" for="allow_remote">
+                                        <strong>Allow Remote</strong>
+                                        <br><small class="text-muted">Outside geofence</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'geofence_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <div>
+                                <a href="{% url 'geofence_delete' geofence.id %}" 
+                                   class="btn btn-outline-danger me-2"
+                                   onclick="return confirm('Delete this location?')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Location Info</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="radius-preview">
+                            <span id="radiusDisplay">{{ geofence.radius }}m</span>
+                        </div>
+                    </div>
+                    
+                    <p class="text-muted small text-center">
+                        Check-in radius: <strong id="radiusText">{{ geofence.radius }} meters</strong>
+                    </p>
+                    
+                    <hr>
+                    
+                    <div class="small">
+                        <p class="mb-2"><strong>Created:</strong><br>
+                        {{ geofence.created_at|date:"M d, Y H:i" }}</p>
+                        
+                        <p class="mb-2"><strong>Last Updated:</strong><br>
+                        {{ geofence.updated_at|date:"M d, Y H:i" }}</p>
+                        
+                        {% if geofence.created_by %}
+                        <p class="mb-0"><strong>Created By:</strong><br>
+                        {{ geofence.created_by.username }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Google Maps JS -->
+<script>
+let map;
+let marker;
+let circle;
+
+const initialLat = {{ geofence.latitude }};
+const initialLng = {{ geofence.longitude }};
+const initialRadius = {{ geofence.radius }};
+
+function initMap() {
+    const center = { lat: initialLat, lng: initialLng };
+    
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: center,
+        zoom: 18,  // High zoom for precise editing
+        mapTypeId: 'hybrid',  // Satellite + labels for precision
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+            style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+            mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain']
+        },
+        streetViewControl: true,
+        fullscreenControl: true
+    });
+    
+    // Add initial marker
+    marker = new google.maps.Marker({
+        position: center,
+        map: map,
+        draggable: true,
+        animation: google.maps.Animation.DROP,
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 12,
+            fillColor: '#0d6efd',
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 3
+        }
+    });
+    
+    // Marker drag event
+    marker.addListener('dragend', function(e) {
+        setLocation(e.latLng.lat(), e.latLng.lng());
+    });
+    
+    // Add radius circle
+    circle = new google.maps.Circle({
+        strokeColor: '#0d6efd',
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: '#0d6efd',
+        fillOpacity: 0.2,
+        map: map,
+        center: center,
+        radius: initialRadius
+    });
+    
+    // Click to set location
+    map.addListener('click', function(e) {
+        setLocation(e.latLng.lat(), e.latLng.lng());
+    });
+}
+
+function setLocation(lat, lng) {
+    document.getElementById('latitude').value = lat.toFixed(7);
+    document.getElementById('longitude').value = lng.toFixed(7);
+    
+    const position = { lat: lat, lng: lng };
+    marker.setPosition(position);
+    circle.setCenter(position);
+    
+    map.setCenter(position);
+    document.getElementById('gpsStatus').innerHTML = '<i class="fas fa-check-circle text-success"></i> Location updated (drag marker to fine-tune)';
+}
+
+function getCurrentLocation() {
+    if (!navigator.geolocation) {
+        alert('Geolocation is not supported');
+        return;
+    }
+    
+    document.getElementById('gpsStatus').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting precise location...';
+    
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            setLocation(position.coords.latitude, position.coords.longitude);
+            
+            const accuracy = position.coords.accuracy;
+            if (accuracy <= 10) {
+                document.getElementById('gpsStatus').innerHTML = '<i class="fas fa-check-circle text-success"></i> Excellent GPS accuracy (±' + accuracy.toFixed(0) + 'm)';
+            } else if (accuracy <= 50) {
+                document.getElementById('gpsStatus').innerHTML = '<i class="fas fa-check-circle text-info"></i> Good accuracy (±' + accuracy.toFixed(0) + 'm)';
+            } else {
+                document.getElementById('gpsStatus').innerHTML = '<i class="fas fa-exclamation-triangle text-warning"></i> Moderate accuracy (±' + accuracy.toFixed(0) + 'm) - drag marker to adjust';
+            }
+        },
+        function(error) {
+            document.getElementById('gpsStatus').innerHTML = '<i class="fas fa-exclamation-triangle text-danger"></i> GPS error';
+            alert('Error: ' + error.message + '\n\nTry:\n1. Enable location services\n2. Use HTTPS\n3. Click on map to set manually');
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+}
+
+// Update radius
+document.getElementById('radius').addEventListener('input', function() {
+    const radius = parseInt(this.value) || 100;
+    document.getElementById('radiusDisplay').textContent = radius + 'm';
+    document.getElementById('radiusText').textContent = radius + ' meters';
+    if (circle) circle.setRadius(radius);
+});
+
+// Manual coordinate input
+document.getElementById('latitude').addEventListener('change', updateFromInputs);
+document.getElementById('longitude').addEventListener('change', updateFromInputs);
+
+function updateFromInputs() {
+    const lat = parseFloat(document.getElementById('latitude').value);
+    const lng = parseFloat(document.getElementById('longitude').value);
+    if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+        setLocation(lat, lng);
+    }
+}
+
+// Load Google Maps API
+function loadGoogleMaps() {
+    const apiKey = '{{ google_maps_api_key|default:"" }}';
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+}
+
+document.addEventListener('DOMContentLoaded', loadGoogleMaps);
+</script>
+{% endblock %}

@@ -1,14 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import ChurchEvent, EventRegistration
+from .models import SchoolEvent, EventRegistration
 from datetime import date, timedelta
 import calendar
 
 
 @login_required
 def events_calendar(request):
-    """Display calendar of church events."""
+    """Display calendar of school events."""
     today = date.today()
     
     # Get month and year from request, default to current
@@ -16,21 +16,21 @@ def events_calendar(request):
     year = int(request.GET.get('year', today.year))
     
     # Get all events for the selected month
-    events_this_month = ChurchEvent.objects.filter(
+    events_this_month = SchoolEvent.objects.filter(
         start_date__year=year,
         start_date__month=month,
         is_active=True
     )
     
     # Get upcoming events (next 30 days)
-    upcoming_events = ChurchEvent.objects.filter(
+    upcoming_events = SchoolEvent.objects.filter(
         start_date__gte=today,
         start_date__lte=today + timedelta(days=30),
         is_active=True
     )[:10]
     
     # Get events happening today
-    todays_events = ChurchEvent.objects.filter(
+    todays_events = SchoolEvent.objects.filter(
         start_date=today,
         is_active=True
     )
@@ -78,7 +78,7 @@ def events_calendar(request):
 
 @login_required
 def add_event(request):
-    """Add a new church event."""
+    """Add a new school event."""
     if request.method == 'POST':
         title = request.POST.get('title')
         description = request.POST.get('description')
@@ -94,7 +94,7 @@ def add_event(request):
         max_attendees = request.POST.get('max_attendees') or None
         registration_required = request.POST.get('registration_required') == 'on'
         
-        ChurchEvent.objects.create(
+        SchoolEvent.objects.create(
             title=title,
             description=description,
             event_type=event_type,
@@ -114,14 +114,14 @@ def add_event(request):
         return redirect('events_calendar')
     
     return render(request, 'add_event.html', {
-        'event_types': ChurchEvent.EVENT_TYPES
+        'event_types': SchoolEvent.EVENT_TYPES
     })
 
 
 @login_required
 def event_detail(request, event_id):
     """View event details and registrations."""
-    event = get_object_or_404(ChurchEvent, id=event_id)
+    event = get_object_or_404(SchoolEvent, id=event_id)
     registrations = event.registrations.all()
     registration_count = registrations.count()
     
@@ -137,8 +137,8 @@ def event_detail(request, event_id):
 
 @login_required
 def register_for_event(request, event_id):
-    """Register a member for an event."""
-    event = get_object_or_404(ChurchEvent, id=event_id)
+    """Register a student for an event."""
+    event = get_object_or_404(SchoolEvent, id=event_id)
     
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -174,9 +174,9 @@ def register_for_event(request, event_id):
 
 @login_required
 def delete_event(request, event_id):
-    """Delete a church event."""
+    """Delete a school event."""
     if request.user.is_superuser or (hasattr(request.user, 'profile') and request.user.profile.role == 'admin'):
-        event = get_object_or_404(ChurchEvent, id=event_id)
+        event = get_object_or_404(SchoolEvent, id=event_id)
         event_title = event.title
         event.delete()
         messages.success(request, f'Event "{event_title}" deleted successfully!')

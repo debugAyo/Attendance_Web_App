@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold"><i class="fa fa-users"></i> Manage Members</h2>
+        <h2 class="fw-bold"><i class="fa fa-users"></i> Manage Users</h2>
         <a href="?export=csv" class="btn btn-outline-success"><i class="fa fa-download"></i> Export CSV</a>
     </div>
     <div class="table-responsive">
@@ -17,7 +17,7 @@
                     <th>Date of Birth</th>
                     <th>Age</th>
                     <th>Email</th>
-                    <th>First Visit</th>
+                    <th>First Check-in</th>
                     <th>Total Attendance</th>
                     <th>Actions</th>
                 </tr>
@@ -41,9 +41,6 @@
                     <td>
                         {% if member.age %}
                             {{ member.age }} yrs
-                            {% if member.age < 13 %}
-                                <span class="badge bg-warning">Child</span>
-                            {% endif %}
                         {% else %}
                             N/A
                         {% endif %}
@@ -64,7 +61,7 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="10" class="text-center text-muted">No members found.</td></tr>
+                <tr><td colspan="10" class="text-center text-muted">No users found.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -75,7 +72,7 @@
         <div class="col-md-3">
             <div class="card text-center bg-info text-white">
                 <div class="card-body">
-                    <h5>Total Members</h5>
+                    <h5>Total Users</h5>
                     <h2>{{ members|length }}</h2>
                 </div>
             </div>

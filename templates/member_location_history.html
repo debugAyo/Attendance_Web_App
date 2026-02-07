@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+
+{% block title %}Location History - {{ member.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_geolocation' %}">Location Analytics</a></li>
+            <li class="breadcrumb-item active">{{ member.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- User Header -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <div class="bg-success bg-opacity-10 rounded-circle p-4">
+                        <i class="fas fa-user fa-2x text-success"></i>
+                    </div>
+                </div>
+                <div class="col">
+                    <h3 class="mb-1">{{ member.name }}</h3>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-phone me-2"></i>{{ member.phone }}
+                        {% if member.email %}
+                        <span class="ms-3"><i class="fas fa-envelope me-2"></i>{{ member.email }}</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="col-auto">
+                    <div class="text-center">
+                        <h2 class="mb-0 text-primary">{{ total_checkins }}</h2>
+                        <small class="text-muted">Total Check-ins</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Unique Locations -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-map-marker-alt text-danger"></i> Unique Locations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if unique_locations %}
+                    <div class="list-group list-group-flush">
+                        {% for loc in unique_locations %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <div>
+                                <strong>{{ loc.geolocation__city|default:"Unknown" }}</strong>
+                                <br><small class="text-muted">{{ loc.geolocation__country }}</small>
+                            </div>
+                            <span class="badge bg-primary rounded-pill">{{ loc.count }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center mb-0">
+                        <i class="fas fa-map-marker-alt fa-2x mb-2"></i><br>
+                        No location data available
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Location History -->
+        <div class="col-md-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history text-info"></i> Check-in History
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 500px;">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Session</th>
+                                    <th>Location</th>
+                                    <th>IP Address</th>
+                                    <th>Device</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for loc in locations %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ loc.timestamp|date:"M d, Y" }}</strong>
+                                        <br><small class="text-muted">{{ loc.timestamp|time:"H:i" }}</small>
+                                    </td>
+                                    <td>{{ loc.service_name|default:"N/A" }}</td>
+                                    <td>
+                                        {% if loc.geolocation %}
+                                        <i class="fas fa-map-marker-alt text-danger me-1"></i>
+                                        {{ loc.geolocation.city|default:"Unknown" }}, {{ loc.geolocation.country|default:"" }}
+                                        {% if loc.geolocation.region_name %}
+                                        <br><small class="text-muted">{{ loc.geolocation.region_name }}</small>
+                                        {% endif %}
+                                        {% else %}
+                                        <span class="text-muted">Local/Private IP</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><code class="small">{{ loc.ip_address }}</code></td>
+                                    <td>
+                                        {% if loc.geolocation %}
+                                            {% if loc.geolocation.is_mobile %}
+                                            <span class="badge bg-info">
+                                                <i class="fas fa-mobile-alt"></i> Mobile
+                                            </span>
+                                            {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-desktop"></i> Desktop
+                                            </span>
+                                            {% endif %}
+                                            {% if loc.geolocation.is_proxy %}
+                                            <span class="badge bg-warning text-dark ms-1">
+                                                <i class="fas fa-mask"></i> VPN
+                                            </span>
+                                            {% endif %}
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">
+                                        <i class="fas fa-inbox fa-2x mb-2"></i><br>
+                                        No check-in records yet
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-3">
+        <a href="{% url 'admin_geolocation' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        <a href="{% url 'admin_manage_members' %}" class="btn btn-outline-primary">
+            <i class="fas fa-users"></i> View All Users
+        </a>
+    </div>
+</div>
+{% endblock %}

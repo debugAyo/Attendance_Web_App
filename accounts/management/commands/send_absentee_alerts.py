@@ -7,7 +7,7 @@ from datetime import date
 
 
 class Command(BaseCommand):
-    help = 'Check for members who missed the last 2 consecutive services and send email alerts to admins'
+    help = 'Check for students who missed the last 2 consecutive classes and send email alerts to admins'
 
     def handle(self, *args, **options):
         # Get all admin emails
@@ -18,11 +18,11 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING('No admin emails found. Please add admin emails.'))
             return
         
-        # Get recent services (last 3)
+        # Get recent classes (last 3)
         recent_services = ChurchService.objects.all().order_by('-id')[:3]
         
         if recent_services.count() < 2:
-            self.stdout.write(self.style.WARNING('Not enough services to check for absentees.'))
+            self.stdout.write(self.style.WARNING('Not enough classes to check for absentees.'))
             return
         
         # Get all members
@@ -62,13 +62,13 @@ class Command(BaseCommand):
             return
         
         # Compose email
-        subject = f'⚠️ Absentee Alert: {len(absentee_members)} Member(s) Missing for 2+ Services'
+        subject = f'⚠️ Absentee Alert: {len(absentee_members)} Student(s) Missing for 2+ Classes'
         
         message = f"""
-Church Attendance Alert
+School Attendance Alert
 =======================
 
-The following {len(absentee_members)} member(s) have not attended the last 2 consecutive church services:
+The following {len(absentee_members)} student(s) have not attended the last 2 consecutive classes:
 
 """
         for i, member in enumerate(absentee_members, 1):

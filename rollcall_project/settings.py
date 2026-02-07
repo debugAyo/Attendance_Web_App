@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,13 +31,13 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', default='django-insecure-h6lmsbd-)o-yx8fr_=(!wbo^5@qp(-yg)*v6i4@qwoi4rf9ld0')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.ngrok-free.app', '.ngrok.io', '.loca.lt']
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 # CSRF trusted origins for production
-CSRF_TRUSTED_ORIGINS = []
+CSRF_TRUSTED_ORIGINS = ['https://*.ngrok-free.app', 'https://*.ngrok.io', 'https://*.loca.lt']
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
 
@@ -260,7 +264,7 @@ LOGGING = {
 # For development: Console backend (prints emails to console)
 # For production: Configure with real SMTP settings
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For testing
-DEFAULT_FROM_EMAIL = 'noreply@churchrollcall.com'
+DEFAULT_FROM_EMAIL = 'noreply@schoolrollcall.com'
 
 # For production, uncomment and configure:
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -270,4 +274,9 @@ DEFAULT_FROM_EMAIL = 'noreply@churchrollcall.com'
 # EMAIL_HOST_USER = 'your-email@gmail.com'
 # EMAIL_HOST_PASSWORD = 'your-app-password'
 # DEFAULT_FROM_EMAIL = 'your-email@gmail.com'
+
+# Google Maps API Key (for geofencing and location features)
+# Get your API key from: https://console.cloud.google.com/google/maps-apis/overview
+# Enable: Maps JavaScript API, Geocoding API
+GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', '')
 

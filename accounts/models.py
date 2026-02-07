@@ -14,13 +14,13 @@ class Profile(models.Model):
         ('other', 'Other'),
     )
     HOW_HEARD_CHOICES = (
-        ('evangelism', 'Evangelism/Street Outreach'),
+        ('referral', 'School Referral'),
         ('friend', 'Through a Friend/Family Member'),
         ('social_media', 'Social Media (Facebook, Instagram, etc.)'),
-        ('website', 'Church Website'),
-        ('passing_by', 'Passing By/One-time Visit'),
+        ('website', 'School Website'),
+        ('passing_by', 'Passing By/Open House Visit'),
         ('relocation', 'Relocated to the Area'),
-        ('invitation', 'Invited by Church Member'),
+        ('invitation', 'Invited by Student/Staff'),
         ('other', 'Other'),
     )
     # allow null user for members who don't have an auth.User account
@@ -31,7 +31,7 @@ class Profile(models.Model):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='member', db_index=True)  # Add index
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES, null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
-    wedding_anniversary = models.DateField(null=True, blank=True, help_text="For anniversary wishes")
+    graduation_year = models.IntegerField(null=True, blank=True, help_text="Expected graduation year")
     
     # New fields for enhanced features
     first_visit_date = models.DateField(auto_now_add=True, null=True, blank=True)
@@ -46,7 +46,7 @@ class Profile(models.Model):
         choices=HOW_HEARD_CHOICES, 
         null=True, 
         blank=True,
-        help_text="How did you hear about our church?"
+        help_text="How did you hear about our school?"
     )
     how_heard_other = models.CharField(
         max_length=200, 
@@ -79,15 +79,15 @@ class UserActivity(models.Model):
         return f'{self.user.username} logged in at {self.login_time}'
 
 
-# Church Events Models
+# Events Models - ChurchEvent kept for DB compatibility, aliased as SchoolEvent
 class ChurchEvent(models.Model):
-    """Model for church events and activities calendar."""
+    """Model for school events and activities calendar."""
     
     EVENT_TYPES = [
-        ('service', 'Church Service'),
-        ('prayer', 'Prayer Meeting'),
-        ('fellowship', 'Fellowship'),
-        ('outreach', 'Outreach'),
+        ('assembly', 'School Assembly'),
+        ('lecture', 'Lecture/Class'),
+        ('seminar', 'Seminar/Workshop'),
+        ('excursion', 'Excursion/Field Trip'),
         ('training', 'Training/Workshop'),
         ('celebration', 'Celebration'),
         ('conference', 'Conference'),
@@ -145,9 +145,12 @@ class ChurchEvent(models.Model):
             return (self.end_date - self.start_date).days + 1
         return 1
 
+# Alias for code clarity
+SchoolEvent = ChurchEvent
+
 
 class EventRegistration(models.Model):
-    """Track member registration for events."""
+    """Track student registration for events."""
     event = models.ForeignKey(ChurchEvent, on_delete=models.CASCADE, related_name='registrations')
     name = models.CharField(max_length=100)
     phone = models.CharField(max_length=15)

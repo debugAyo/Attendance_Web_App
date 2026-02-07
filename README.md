@@ -1,20 +1,34 @@
-# RollCall - Church Attendance System
+# RollCall - School Attendance System
 
-RollCall is a modern, web-based application built with Django to help churches and organizations manage member attendance efficiently. It provides a simple interface for members to mark their attendance and a comprehensive dashboard for administrators to view analytics, track trends, and manage the community.
+RollCall is a modern, web-based application built with Django to help schools and organizations manage student attendance efficiently. It provides a simple interface for students to mark their attendance and a comprehensive dashboard for administrators to view analytics, track trends, and manage the community.
 
 ## Features
 
-- **Member Management**: Simple registration and profile management for church members.
-- **Attendance Tracking**: Members can easily mark their attendance for specific church services using a unique service code.
+- **Student Management**: Simple registration and profile management for school students.
+- **Attendance Tracking**: Students can easily mark their attendance for specific school classes using a unique class code.
 - **Admin Dashboard**: A powerful dashboard for administrators with key metrics:
-    - Total members and services.
+    - Total students and classes.
     - Attendance rates for the current day, week, and month.
     - Visual charts showing attendance trends over time.
-    - Lists of top attendees and members who have been absent.
-- **Service Management**: Admins can create, edit, and delete church services, generating unique codes for each.
-- **Automated Alerts**: A custom management command can be run to identify and alert members who have been absent for a specified period.
-- **Event Calendar**: A simple calendar system to display upcoming church events.
+    - Lists of top attendees and students who have been absent.
+- **Class Management**: Admins can create, edit, and delete school classes, generating unique codes for each.
+- **Automated Alerts**: A custom management command can be run to identify and alert students who have been absent for a specified period.
+- **Event Calendar**: A simple calendar system to display upcoming school events.
 - **Search Functionality**: Quickly find members from the attendance marking page.
+
+### 🌍 GPS Geolocation & Geofencing (NEW!)
+
+- **Precise GPS Location Tracking**: Capture exact coordinates (latitude/longitude) when students log in or mark attendance.
+- **Google Maps Integration**: High-precision satellite/hybrid maps for accurate location selection.
+- **Geofencing**: Define restricted check-in zones with customizable radius (10m - 10km).
+- **Location Verification**: Ensure students are physically present at the school location before check-in.
+- **Geolocation Dashboard**: Visual analytics showing:
+    - Student locations on an interactive map
+    - Login/attendance location history
+    - Inside/outside geofence statistics
+- **IP-based Location Fallback**: City-level location detection when GPS is unavailable.
+- **Draggable Map Markers**: Fine-tune geofence locations with drag-and-drop precision.
+- **GPS Accuracy Display**: Real-time accuracy indicators (±meters) for location verification.
 
 ## Tech Stack
 
@@ -22,6 +36,8 @@ RollCall is a modern, web-based application built with Django to help churches a
 - **Frontend**: HTML, CSS, JavaScript, Bootstrap 5
 - **Database**: SQLite (for development), PostgreSQL (recommended for production)
 - **Charting**: Chart.js
+- **Maps**: Google Maps API (satellite/hybrid view for precise location)
+- **Geolocation**: HTML5 Geolocation API with high-accuracy GPS
 - **Deployment**: Gunicorn, WhiteNoise
 
 ## Local Setup and Installation

@@ -3,22 +3,74 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.core.cache import cache
 from .forms import SignupForm
 from .models import UserActivity, Profile
+from .geolocation_service import track_login_location
 from attendance.models import Attendance, MemberAttendance
 from datetime import date
 import json
+
+
+def check_login_attempts(ip_address):
+    """Check if IP has too many failed login attempts."""
+    cache_key = f"login_attempts_{ip_address}"
+    attempts = cache.get(cache_key, 0)
+    return attempts >= 5  # Block after 5 failed attempts
+
+
+def record_failed_attempt(ip_address):
+    """Record a failed login attempt."""
+    cache_key = f"login_attempts_{ip_address}"
+    attempts = cache.get(cache_key, 0)
+    cache.set(cache_key, attempts + 1, 900)  # 15 minute lockout
+
+
+def clear_login_attempts(ip_address):
+    """Clear login attempts after successful login."""
+    cache_key = f"login_attempts_{ip_address}"
+    cache.delete(cache_key)
+
 
 # Custom login view
 class CustomLoginView(LoginView):
     template_name = 'accounts/login.html'
 
+    def dispatch(self, request, *args, **kwargs):
+        # Get client IP
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        ip = x_forwarded_for.split(',')[0].strip() if x_forwarded_for else request.META.get('REMOTE_ADDR', '')
+        
+        # Check if locked out
+        if check_login_attempts(ip):
+            messages.error(request, 'Too many failed login attempts. Please try again in 15 minutes.')
+            return render(request, self.template_name, {'form': self.get_form_class()()})
+        
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_invalid(self, form):
+        # Record failed attempt
+        x_forwarded_for = self.request.META.get('HTTP_X_FORWARDED_FOR')
+        ip = x_forwarded_for.split(',')[0].strip() if x_forwarded_for else self.request.META.get('REMOTE_ADDR', '')
+        record_failed_attempt(ip)
+        return super().form_invalid(form)
+
     def form_valid(self, form):
         user = form.get_user()
         # Allow superusers or users with admin role to log in
         if user.is_superuser or (hasattr(user, 'profile') and getattr(user.profile, 'role', None) == 'admin'):
+            # Clear failed attempts on success
+            x_forwarded_for = self.request.META.get('HTTP_X_FORWARDED_FOR')
+            ip = x_forwarded_for.split(',')[0].strip() if x_forwarded_for else self.request.META.get('REMOTE_ADDR', '')
+            clear_login_attempts(ip)
+            
             response = super().form_valid(form)
             UserActivity.objects.create(user=self.request.user)
+            # Track login location with IP geolocation
+            track_login_location(user=self.request.user, request=self.request, is_successful=True)
             return response
         else:
             from django.contrib import messages
@@ -67,12 +119,13 @@ def home(request):
             age = get_age(profile.date_of_birth)
             gender = profile.gender.lower() if profile.gender else ''
             
-            if gender == 'male':
+            # Handle both 'M'/'F' and 'male'/'female' formats
+            if gender in ['male', 'm']:
                 if age is not None and age < 13:
                     children += 1
                 else:
                     male += 1
-            elif gender == 'female':
+            elif gender in ['female', 'f']:
                 if age is not None and age < 13:
                     children += 1
                 else:
@@ -130,8 +183,8 @@ def home(request):
         # === ALERTS ===
         alerts = []
         
-        # === ABSENTEE DETECTION (Missed 2+ Consecutive Services) ===
-        # Get the last 3 services (to check for 2 consecutive misses)
+        # === ABSENTEE DETECTION (Missed 2+ Consecutive Classes) ===
+        # Get the last 3 classes (to check for 2 consecutive misses)
         from attendance.models import ChurchService
         recent_services = ChurchService.objects.all().order_by('-id')[:3]
         
@@ -242,7 +295,7 @@ def signup_view(request):
             role = form.cleaned_data.get('role')
             if role == 'admin':
                 # SECURITY: Only allow admin creation via invite or superuser approval
-                messages.error(request, 'Admin accounts can only be created by the system administrator. Please contact your church administrator.')
+                messages.error(request, 'Admin accounts can only be created by the system administrator. Please contact your school administrator.')
                 return redirect('signup')
             elif role == 'member':
                 # Create a MemberProfile (no login, no user account)
@@ -251,7 +304,6 @@ def signup_view(request):
                 phone = form.cleaned_data.get('phone')
                 gender = form.cleaned_data.get('gender')
                 dob = form.cleaned_data.get('date_of_birth')
-                wedding_anniversary = form.cleaned_data.get('wedding_anniversary')
                 member_email = form.cleaned_data.get('member_email')
                 how_heard = form.cleaned_data.get('how_heard')
                 how_heard_other = form.cleaned_data.get('how_heard_other')
@@ -269,7 +321,6 @@ def signup_view(request):
                     phone=phone,
                     gender=gender,
                     date_of_birth=dob,
-                    wedding_anniversary=wedding_anniversary,
                     email=member_email,
                     how_heard=how_heard if how_heard else None,
                     how_heard_other=how_heard_other if how_heard_other else None
@@ -294,3 +345,54 @@ def custom_logout(request):
     logout(request)
     messages.success(request, 'You have been successfully logged out.')
     return redirect('landing')
+
+
+@login_required
+@require_POST
+def update_login_gps(request):
+    """
+    Update the most recent LoginLocation with GPS coordinates from browser.
+    Called via AJAX after successful login to add precise location.
+    """
+    try:
+        data = json.loads(request.body)
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        accuracy = data.get('accuracy')
+        
+        if latitude is None or longitude is None:
+            return JsonResponse({'status': 'error', 'message': 'Missing coordinates'}, status=400)
+        
+        from .models_geolocation import LoginLocation
+        
+        # Get the most recent login for this user (within last 5 minutes)
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        recent_login = LoginLocation.objects.filter(
+            user=request.user,
+            login_time__gte=timezone.now() - timedelta(minutes=5)
+        ).order_by('-login_time').first()
+        
+        if recent_login:
+            recent_login.device_latitude = latitude
+            recent_login.device_longitude = longitude
+            recent_login.gps_accuracy = accuracy
+            recent_login.save()
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'GPS location updated',
+                'location': {
+                    'lat': float(latitude),
+                    'lng': float(longitude),
+                    'accuracy': accuracy
+                }
+            })
+        else:
+            return JsonResponse({'status': 'error', 'message': 'No recent login found'}, status=404)
+            
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)

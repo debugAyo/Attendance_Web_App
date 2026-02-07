@@ -1,8 +1,8 @@
 from django.contrib import admin
-from .models import MemberAttendance, ChurchService
+from .models import MemberAttendance, SchoolClass
 
-@admin.register(ChurchService)
-class ChurchServiceAdmin(admin.ModelAdmin):
+@admin.register(SchoolClass)
+class SchoolClassAdmin(admin.ModelAdmin):
 	list_display = ('id', 'name', 'code')
 	search_fields = ('name', 'code')
 	ordering = ['-id']

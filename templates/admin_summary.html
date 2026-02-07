@@ -76,22 +76,18 @@
         </div>
         <div class="col-md-4">
             <div class="card">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="mb-0">💍 Upcoming Anniversaries</h5>
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">📊 Attendance Rate</h5>
                 </div>
-                <div class="card-body">
-                    {% if upcoming_anniversaries %}
-                        <ul class="list-unstyled mb-0">
-                            {% for anniversary in upcoming_anniversaries %}
-                                <li class="mb-2">
-                                    <strong>{{ anniversary.name }}</strong> - {{ anniversary.date|date:"M d" }}
-                                    <span class="badge bg-danger">{{ anniversary.years }} yr{{ anniversary.years|pluralize }}</span>
-                                    <span class="badge bg-warning text-dark">{{ anniversary.days_until }} day{{ anniversary.days_until|pluralize }}</span>
-                                </li>
-                            {% endfor %}
-                        </ul>
+                <div class="card-body text-center">
+                    {% if total_members > 0 %}
+                        <h2 class="{% if present_today > total_members|divisibleby:2 %}text-success{% else %}text-warning{% endif %}">
+                            {{ present_today }}%
+                        </h2>
+                        <p class="text-muted mb-0">Today's attendance rate</p>
+                        <small class="text-muted">{{ present_today }} of {{ total_members }} students present</small>
                     {% else %}
-                        <p class="text-muted mb-0">No upcoming anniversaries in the next 30 days.</p>
+                        <p class="text-muted mb-0">No students registered yet.</p>
                     {% endif %}
                 </div>
             </div>

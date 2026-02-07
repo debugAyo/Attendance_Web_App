@@ -1,14 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# ChurchService must be defined first as it's referenced by other models
+# ChurchService - keeping original name to match database table
+# Can be referred to as SchoolClass in code for clarity
 class ChurchService(models.Model):
     name = models.CharField(max_length=100)
-    code = models.CharField(max_length=20, unique=True, help_text="Unique code for members to mark attendance.")
-    members = models.ManyToManyField(User, related_name='church_services', blank=True)
+    code = models.CharField(max_length=20, unique=True, help_text="Unique code for students to mark attendance.")
+    members = models.ManyToManyField(User, related_name='school_classes', blank=True)
 
     def __str__(self):
         return self.name
+
+# Alias for code clarity
+SchoolClass = ChurchService
 
 class Attendance(models.Model):
     service = models.ForeignKey(ChurchService, on_delete=models.CASCADE)

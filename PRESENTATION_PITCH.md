@@ -1,14 +1,14 @@
-# RollCall - Church Attendance Management System
+# RollCall - school Attendance Management System
 ## Presentation Pitch for Sunday
 
 ---
 
 ## 🎯 The Problem
 
-**Church administrators face these challenges:**
+**school administrators face these challenges:**
 - ❌ Manual attendance tracking is time-consuming and error-prone
-- ❌ No real-time insights into member engagement
-- ❌ Difficult to identify members who are becoming inactive
+- ❌ No real-time insights into student engagement
+- ❌ Difficult to identify students who are becoming inactive
 - ❌ Paper-based systems are hard to analyze and store
 - ❌ No way to track attendance trends over time
 
@@ -17,9 +17,9 @@
 ## ✨ The Solution: RollCall
 
 **A modern, web-based attendance management system that:**
-- ✅ Allows members to mark attendance in seconds using their phones
-- ✅ Provides real-time analytics and insights for church leaders
-- ✅ Automatically identifies inactive members who need pastoral care
+- ✅ Allows students to mark attendance in seconds using their phones
+- ✅ Provides real-time analytics and insights for school leaders
+- ✅ Automatically identifies inactive students who need pastoral care
 - ✅ Tracks attendance trends with beautiful visualizations
 - ✅ Works on any device - phone, tablet, or computer
 
@@ -27,46 +27,46 @@
 
 ## 🚀 Key Features
 
-### For Members:
+### For students:
 1. **Quick Check-In**
-   - Enter phone number and service code
+   - Enter phone number and class code
    - Mark attendance in under 10 seconds
    - No account required for basic attendance
 
 2. **Personal Profile**
    - Track your own attendance history
    - Update contact information
-   - View upcoming church events
+   - View upcoming school events
 
 ### For Administrators:
 1. **Comprehensive Dashboard**
    - See today's attendance at a glance
-   - View total members, male/female ratio, children count
+   - View total students, male/female ratio, children count
    - Monitor attendance trends over 30 days
-   - Identify top attendees and inactive members
+   - Identify top attendees and inactive students
 
-2. **Member Management**
-   - Add, edit, or remove members
-   - View complete attendance history per member
+2. **student Management**
+   - Add, edit, or remove students
+   - View complete attendance history per student
    - Export data for reports (CSV format)
-   - Search and filter members easily
+   - Search and filter students easily
 
-3. **Service Management**
-   - Create services with unique access codes
-   - Edit or delete services as needed
-   - Track attendance per service type
-   - Compare attendance across different services
+3. **class Management**
+   - Create classs with unique access codes
+   - Edit or delete classs as needed
+   - Track attendance per class type
+   - Compare attendance across different classs
 
 4. **Smart Alerts**
-   - Automatic detection of members absent for 2+ services
-   - List of inactive members (30+ days absent)
+   - Automatic detection of students absent for 2+ classs
+   - List of inactive students (30+ days absent)
    - Contact information readily available for follow-up
    - One-click call/email/SMS options
 
 5. **Events Calendar**
-   - Create and manage church events
+   - Create and manage school events
    - Track event registrations
-   - Display upcoming events for members
+   - Display upcoming events for students
 
 6. **Offline Mode**
    - Mark attendance even without internet
@@ -80,14 +80,14 @@
 ### Before RollCall:
 - 📋 Admin spends 30+ minutes manually counting attendance
 - 📊 No way to analyze attendance patterns
-- 😔 Members slip away unnoticed
+- 😔 students slip away unnoticed
 - 📞 Hard to know who to follow up with
 
 ### After RollCall:
 - ⚡ Attendance tracked automatically in real-time
-- 📈 Clear insights into member engagement trends
-- ❤️ Proactive pastoral care for absent members
-- 🎯 Data-driven decisions for church growth
+- 📈 Clear insights into student engagement trends
+- ❤️ Proactive pastoral care for absent students
+- 🎯 Data-driven decisions for school growth
 
 ---
 
@@ -99,7 +99,7 @@
    - Easy for all age groups
 
 2. **Speed & Efficiency**
-   - Members check in within seconds
+   - students check in within seconds
    - No app download required
    - Works in any web browser
 
@@ -122,7 +122,7 @@
 **Why These Technologies?**
 - Free and open-source
 - Industry-standard and reliable
-- Scalable for church growth
+- Scalable for school growth
 - Easy to maintain and update
 
 ---
@@ -131,9 +131,9 @@
 
 **Show these features during your presentation:**
 
-1. **Member Check-In** (30 seconds)
+1. **student Check-In** (30 seconds)
    - Open the site on your phone
-   - Enter phone number and service code
+   - Enter phone number and class code
    - Boom! Attendance marked
 
 2. **Admin Dashboard** (1 minute)
@@ -143,31 +143,31 @@
    - Highlight the "Top Attendees" section
 
 3. **Absentee Alert** (30 seconds)
-   - Show the list of members who missed services
+   - Show the list of students who missed classs
    - Demonstrate the one-click contact options
    - Explain how this enables pastoral care
 
-4. **Member Management** (30 seconds)
-   - Show the complete member list
+4. **student Management** (30 seconds)
+   - Show the complete student list
    - Demonstrate search functionality
-   - Show attendance history for a specific member
+   - Show attendance history for a specific student
 
-5. **Service Management** (30 seconds)
-   - Create a new service
-   - Show the unique service code
-   - Explain how members use the code
+5. **class Management** (30 seconds)
+   - Create a new class
+   - Show the unique class code
+   - Explain how students use the code
 
 ---
 
 ## 🎯 Value Proposition
 
-### For Church Leaders:
+### For school Leaders:
 - **Save Time**: Reduce administrative work by 70%
 - **Better Insights**: Make data-driven decisions
-- **Improved Care**: Never miss an absent member
-- **Growth Tracking**: Monitor church growth trends
+- **Improved Care**: Never miss an absent student
+- **Growth Tracking**: Monitor school growth trends
 
-### For Church Members:
+### For school students:
 - **Convenience**: Quick and easy check-in
 - **No Hassle**: No app to download
 - **Privacy**: Only required info collected
@@ -178,8 +178,8 @@
 ## 🚀 Future Enhancements
 
 **Potential Next Steps:**
-1. SMS notifications for absent members
-2. Integration with church management software
+1. SMS notifications for absent students
+2. Integration with school management software
 3. Mobile app for iOS and Android
 4. Automated weekly attendance reports via email
 5. Multi-language support
@@ -197,7 +197,7 @@
 - **Maintenance**: Minimal (Django is stable)
 
 **To Upgrade (Optional):**
-- **Paid Hosting**: $7-$25/month (for unlimited members)
+- **Paid Hosting**: $7-$25/month (for unlimited students)
 - **Custom Domain**: $12-$20/year
 - **SMS Notifications**: Pay-as-you-go pricing
 
@@ -207,10 +207,10 @@
 
 ## 🎤 Closing Statement
 
-"RollCall transforms church attendance from a manual chore into an automated, insightful system that helps church leaders focus on what matters most: caring for their members. It's free, it's fast, and it's ready to use today."
+"RollCall transforms school attendance from a manual chore into an automated, insightful system that helps school leaders focus on what matters most: caring for their students. It's free, it's fast, and it's ready to use today."
 
 **Call to Action:**
-"Let's see it in action! I'll now demonstrate how a member marks attendance and how an admin views the results."
+"Let's see it in action! I'll now demonstrate how a student marks attendance and how an admin views the results."
 
 ---
 
@@ -219,25 +219,25 @@
 **Expected Questions:**
 
 **Q: Is this secure?**
-A: Yes! We use industry-standard Django security features, HTTPS encryption, and role-based access control. Only admins can see full member data.
+A: Yes! We use industry-standard Django security features, HTTPS encryption, and role-based access control. Only admins can see full student data.
 
-**Q: What if members don't have smartphones?**
-A: Admins can mark attendance on behalf of members using the offline mode or admin panel. Plus, any web browser works - even on basic phones.
+**Q: What if students don't have smartphones?**
+A: Admins can mark attendance on behalf of students using the offline mode or admin panel. Plus, any web browser works - even on basic phones.
 
 **Q: Can we export data?**
-A: Yes! Admins can export member data and attendance records to CSV files for backup or further analysis.
+A: Yes! Admins can export student data and attendance records to CSV files for backup or further analysis.
 
-**Q: What happens if the internet goes down during service?**
+**Q: What happens if the internet goes down during class?**
 A: We have an offline mode! Admins can mark attendance offline, and it syncs when the connection is restored.
 
-**Q: How many members can the system handle?**
-A: The free tier handles up to 500+ members easily. For larger churches, we can upgrade to paid hosting for unlimited capacity.
+**Q: How many students can the system handle?**
+A: The free tier handles up to 500+ students easily. For larger schooles, we can upgrade to paid hosting for unlimited capacity.
 
-**Q: Can we customize it for our church?**
-A: Absolutely! The system is fully customizable - we can add your church logo, colors, and specific features you need.
+**Q: Can we customize it for our school?**
+A: Absolutely! The system is fully customizable - we can add your school logo, colors, and specific features you need.
 
 **Q: What if someone marks attendance but wasn't actually there?**
-A: Service codes change per service, and admins can review and edit attendance records. We can also add location verification if needed.
+A: class codes change per class, and admins can review and edit attendance records. We can also add location verification if needed.
 
 ---
 
@@ -245,7 +245,7 @@ A: Service codes change per service, and admins can review and edit attendance r
 
 1. **Start with the problem** - Make it relatable
 2. **Show, don't tell** - Live demo is powerful
-3. **Use real data** - Add some sample members beforehand
+3. **Use real data** - Add some sample students beforehand
 4. **Be enthusiastic** - Your energy is contagious
 5. **Keep it simple** - Don't get too technical
 6. **End with impact** - Show the difference it makes

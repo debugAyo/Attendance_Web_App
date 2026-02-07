@@ -47,6 +47,192 @@ body {
     z-index: 2;
 }
 
+/* ========================================
+   MODERN ANIMATED LOGO STYLES
+   ======================================== */
+
+.logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.logo-svg {
+    width: 120px;
+    height: 120px;
+    animation: logoFloat 3s ease-in-out infinite;
+    filter: drop-shadow(0 10px 30px rgba(102, 126, 234, 0.4));
+}
+
+.logo-text {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, #fff 0%, #e0e7ff 50%, #fff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: textShine 3s ease-in-out infinite;
+}
+
+/* Logo floating animation */
+@keyframes logoFloat {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+/* Text shine animation */
+@keyframes textShine {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* Outer ring rotation */
+.logo-ring {
+    animation: ringRotate 8s linear infinite;
+    transform-origin: center;
+    stroke-dasharray: 8 4;
+}
+
+@keyframes ringRotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Logo background pulse */
+.logo-bg {
+    animation: bgPulse 2s ease-in-out infinite;
+}
+
+@keyframes bgPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.02);
+        opacity: 0.95;
+    }
+}
+
+/* Checkmark animations - staggered appearance */
+.checkmark {
+    stroke-dasharray: 30;
+    stroke-dashoffset: 30;
+    animation: drawCheck 0.5s ease forwards;
+}
+
+.check-1 { animation-delay: 0.3s; }
+.check-2 { animation-delay: 0.6s; }
+.check-3 { animation-delay: 0.9s; }
+
+@keyframes drawCheck {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* Check lines fade in */
+.check-line {
+    opacity: 0;
+    animation: fadeInLine 0.3s ease forwards;
+}
+
+.line-1 { animation-delay: 0.1s; }
+.line-2 { animation-delay: 0.4s; }
+.line-3 { animation-delay: 0.7s; }
+
+@keyframes fadeInLine {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Particle animations */
+.particle {
+    animation: particleFloat 4s ease-in-out infinite;
+}
+
+.p1 {
+    animation-delay: 0s;
+    animation-duration: 3.5s;
+}
+
+.p2 {
+    animation-delay: 0.5s;
+    animation-duration: 4s;
+}
+
+.p3 {
+    animation-delay: 1s;
+    animation-duration: 3.8s;
+}
+
+.p4 {
+    animation-delay: 1.5s;
+    animation-duration: 4.2s;
+}
+
+@keyframes particleFloat {
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.5;
+    }
+    25% {
+        transform: translate(5px, -8px) scale(1.2);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(-3px, -12px) scale(0.9);
+        opacity: 0.6;
+    }
+    75% {
+        transform: translate(-8px, -5px) scale(1.1);
+        opacity: 0.7;
+    }
+}
+
+/* Logo icon subtle animation */
+.logo-icon {
+    animation: iconGlow 2s ease-in-out infinite;
+}
+
+@keyframes iconGlow {
+    0%, 100% {
+        filter: url(#glow);
+    }
+    50% {
+        filter: url(#glow) brightness(1.1);
+    }
+}
+
+/* Hover effect on logo */
+.logo-container:hover .logo-svg {
+    animation: logoFloat 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 15px 40px rgba(102, 126, 234, 0.6));
+}
+
+.logo-container:hover .logo-text {
+    text-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Old logo class (keeping for backward compatibility) */
 .auth-info-panel .logo {
     font-size: 2.5rem;
     font-weight: 700;
@@ -261,15 +447,41 @@ body {
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
     
-    /* Add logo at top of form on mobile */
+    /* Mobile logo styles */
     .auth-form-wrapper::before {
-        content: '🏛️ RollCall';
+        content: '';
+        display: block;
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        animation: mobileLogo 3s ease-in-out infinite;
+    }
+    
+    .auth-form-wrapper::after {
+        content: 'RollCall';
         display: block;
         text-align: center;
         font-size: 1.8rem;
         font-weight: 700;
-        color: #0d6efd;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         margin-bottom: 1rem;
+    }
+    
+    @keyframes mobileLogo {
+        0%, 100% {
+            transform: translateY(0) scale(1);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        50% {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+        }
     }
     
     .auth-form-wrapper {
@@ -299,6 +511,11 @@ body {
     }
     
     .auth-form-wrapper::before {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .auth-form-wrapper::after {
         font-size: 1.5rem;
     }
     
@@ -314,5 +531,17 @@ body {
     .btn-submit {
         padding: 0.85rem;
         font-size: 1rem;
+    }
+}
+
+/* Desktop logo size adjustments */
+@media (min-width: 769px) {
+    .logo-svg {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .logo-text {
+        font-size: 2.8rem;
     }
 }

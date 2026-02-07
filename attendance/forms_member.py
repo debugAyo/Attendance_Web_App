@@ -1,5 +1,5 @@
 from django import forms
-from .models import ChurchService
+from .models import SchoolClass
 
 class MemberAttendanceForm(forms.Form):
     name = forms.CharField(
@@ -15,15 +15,15 @@ class MemberAttendanceForm(forms.Form):
         widget=forms.TextInput(attrs={'readonly': 'readonly'})
     )
     service_code = forms.CharField(
-        label="Service Code", 
+        label="Class Code", 
         max_length=20, 
         required=True,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter code displayed at service'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter code displayed at class'})
     )
     service = forms.ModelChoiceField(
-        queryset=ChurchService.objects.all(), 
-        label="Church Service", 
+        queryset=SchoolClass.objects.all(), 
+        label="School Class", 
         required=True,
-        empty_label="-- Select a service --",
+        empty_label="-- Select a class --",
         widget=forms.Select(attrs={'class': 'form-control'})
     )

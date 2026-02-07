@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Site Locations - Geofence Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    #map {
+        height: 450px;
+        border-radius: 12px;
+        z-index: 1;
+    }
+    .geofence-card {
+        transition: all 0.2s ease;
+        border-left: 4px solid #0d6efd;
+    }
+    .geofence-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .geofence-card.inactive {
+        border-left-color: #6c757d;
+        opacity: 0.7;
+    }
+    .site-type-badge {
+        font-size: 0.75rem;
+    }
+    .radius-indicator {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 0.8rem;
+    }
+    .stats-mini {
+        font-size: 0.85rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="fas fa-map-marked-alt text-primary"></i> Site Locations
+            </h2>
+            <p class="text-muted mb-0">Manage geofence locations for GPS-based check-in validation</p>
+        </div>
+        <div>
+            <a href="{% url 'geofence_add' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Location
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="bg-success bg-opacity-10 rounded-circle p-3 me-3">
+                        <i class="fas fa-check-circle text-success fa-2x"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0">{{ total_active }}</h3>
+                        <p class="text-muted mb-0">Active Locations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="bg-secondary bg-opacity-10 rounded-circle p-3 me-3">
+                        <i class="fas fa-pause-circle text-secondary fa-2x"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0">{{ total_inactive }}</h3>
+                        <p class="text-muted mb-0">Inactive Locations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                        <i class="fas fa-globe text-primary fa-2x"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0">{{ geofences|length }}</h3>
+                        <p class="text-muted mb-0">Total Locations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Interactive Map -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-map text-info"></i> Location Map
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Location List -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list text-primary"></i> All Locations
+                    </h5>
+                </div>
+                <div class="card-body p-0" style="max-height: 400px; overflow-y: auto;">
+                    {% for gf in geofences %}
+                    <div class="geofence-card p-3 border-bottom {% if not gf.is_active %}inactive{% endif %}"
+                         data-lat="{{ gf.latitude }}" data-lng="{{ gf.longitude }}" data-id="{{ gf.id }}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    {{ gf.name }}
+                                    {% if not gf.is_active %}
+                                    <span class="badge bg-secondary ms-1">Inactive</span>
+                                    {% endif %}
+                                </h6>
+                                <span class="badge bg-info site-type-badge mb-2">{{ gf.get_site_type_display }}</span>
+                                <p class="text-muted small mb-1">
+                                    <i class="fas fa-map-marker-alt"></i> {{ gf.city|default:"No city" }}{% if gf.country %}, {{ gf.country }}{% endif %}
+                                </p>
+                                <p class="text-muted small mb-0">
+                                    <i class="fas fa-circle-notch"></i> {{ gf.radius }}m radius
+                                </p>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" href="{% url 'geofence_edit' gf.id %}">
+                                        <i class="fas fa-edit me-2"></i>Edit
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{% url 'geofence_toggle' gf.id %}">
+                                        <i class="fas fa-power-off me-2"></i>{% if gf.is_active %}Deactivate{% else %}Activate{% endif %}
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'geofence_delete' gf.id %}"
+                                           onclick="return confirm('Delete this location?')">
+                                        <i class="fas fa-trash me-2"></i>Delete
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        {% if geofence_stats %}
+                        <div class="stats-mini mt-2 pt-2 border-top">
+                            <span class="text-success me-3">
+                                <i class="fas fa-check"></i> {{ geofence_stats|get_item:gf.id|get_item:'within'|default:0 }} valid
+                            </span>
+                            <span class="text-danger">
+                                <i class="fas fa-times"></i> {{ geofence_stats|get_item:gf.id|get_item:'outside'|default:0 }} outside
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No locations yet</h5>
+                        <p class="text-muted">Add your first site location to enable GPS check-ins</p>
+                        <a href="{% url 'geofence_add' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Location
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Info -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5><i class="fas fa-info-circle text-info"></i> Geofencing Features</h5>
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-crosshairs text-primary mt-1 me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">GPS Validation</h6>
+                                    <p class="text-muted small mb-0">Verify check-ins are within designated areas using precise GPS coordinates</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-sliders-h text-success mt-1 me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Flexible Radius</h6>
+                                    <p class="text-muted small mb-0">Set custom radius (10m - 10km) for each location based on site size</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-shield-alt text-warning mt-1 me-3"></i>
+                                <div>
+                                    <h6 class="mb-1">Compliance Ready</h6>
+                                    <p class="text-muted small mb-0">Accurate time tracking for payroll and attendance compliance</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Google Maps JS -->
+<script>
+// Parse geofences data
+const geofences = {{ geofences_json|safe }};
+
+// Initialize map
+let map;
+let markers = {};
+let circles = {};
+
+function initMap() {
+    // Default center - Minna, Niger State, Nigeria (Gidan Kwano area)
+    let center = { lat: 9.5366, lng: 6.4569 };
+    let zoom = 6;
+    
+    if (geofences.length > 0) {
+        center = { lat: geofences[0].lat, lng: geofences[0].lng };
+        zoom = 16;  // Higher zoom for more detail
+    }
+    
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: center,
+        zoom: zoom,
+        mapTypeId: 'hybrid',  // Satellite + labels for better precision
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+            style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+            mapTypeIds: ['roadmap', 'satellite', 'hybrid', 'terrain']
+        },
+        streetViewControl: true,
+        fullscreenControl: true
+    });
+    
+    // Add markers and circles for each geofence
+    geofences.forEach(gf => {
+        addGeofenceToMap(gf);
+    });
+    
+    // Fit bounds to show all markers
+    if (geofences.length > 1) {
+        const bounds = new google.maps.LatLngBounds();
+        geofences.forEach(gf => {
+            bounds.extend({ lat: gf.lat, lng: gf.lng });
+        });
+        map.fitBounds(bounds);
+    }
+}
+
+function addGeofenceToMap(gf) {
+    const color = gf.is_active ? '#0d6efd' : '#6c757d';
+    const position = { lat: gf.lat, lng: gf.lng };
+    
+    // Create marker
+    const marker = new google.maps.Marker({
+        position: position,
+        map: map,
+        title: gf.name,
+        icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: color,
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 2
+        }
+    });
+    
+    // Create info window content
+    const infoContent = `
+        <div style="min-width: 220px; padding: 10px;">
+            <h6 style="margin: 0 0 8px 0; font-weight: 600;">${gf.name}</h6>
+            <span class="badge" style="background-color: ${color}; color: white; font-size: 0.7rem; padding: 3px 8px; border-radius: 4px;">${gf.site_type}</span>
+            <hr style="margin: 10px 0; border-color: #eee;">
+            <p style="margin: 5px 0; font-size: 0.85rem;"><strong>Address:</strong> ${gf.address || 'Not specified'}</p>
+            <p style="margin: 5px 0; font-size: 0.85rem;"><strong>Radius:</strong> ${gf.radius}m</p>
+            <p style="margin: 5px 0; font-size: 0.85rem;"><strong>Coordinates:</strong><br>
+                <code style="font-size: 0.75rem;">${gf.lat.toFixed(7)}, ${gf.lng.toFixed(7)}</code>
+            </p>
+            <p style="margin: 5px 0; font-size: 0.85rem;"><strong>Status:</strong> 
+                ${gf.is_active ? '<span style="color: green;">Active</span>' : '<span style="color: gray;">Inactive</span>'}
+            </p>
+            <div style="margin-top: 12px;">
+                <a href="/admin/geofences/edit/${gf.id}/" class="btn btn-sm btn-outline-primary">Edit</a>
+            </div>
+        </div>
+    `;
+    
+    const infoWindow = new google.maps.InfoWindow({
+        content: infoContent
+    });
+    
+    marker.addListener('click', () => {
+        infoWindow.open(map, marker);
+    });
+    
+    markers[gf.id] = { marker, infoWindow };
+    
+    // Create circle for radius visualization
+    const circle = new google.maps.Circle({
+        strokeColor: color,
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: color,
+        fillOpacity: 0.15,
+        map: map,
+        center: position,
+        radius: gf.radius  // in meters
+    });
+    
+    circles[gf.id] = circle;
+}
+
+// Highlight location on list hover/click
+document.querySelectorAll('.geofence-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        const id = this.dataset.id;
+        if (markers[id]) {
+            map.setCenter({ lat: parseFloat(this.dataset.lat), lng: parseFloat(this.dataset.lng) });
+            map.setZoom(17);
+            markers[id].infoWindow.open(map, markers[id].marker);
+        }
+    });
+    
+    card.addEventListener('click', function() {
+        const id = this.dataset.id;
+        if (markers[id]) {
+            map.setCenter({ lat: parseFloat(this.dataset.lat), lng: parseFloat(this.dataset.lng) });
+            map.setZoom(18);  // Very high zoom for precise viewing
+            markers[id].infoWindow.open(map, markers[id].marker);
+        }
+    });
+});
+
+// Load Google Maps API
+function loadGoogleMaps() {
+    const apiKey = '{{ google_maps_api_key|default:"" }}';
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+}
+
+document.addEventListener('DOMContentLoaded', loadGoogleMaps);
+</script>
+{% endblock %}
